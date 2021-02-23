@@ -1,0 +1,37 @@
+//! # Elite: Dangerous Player Journal(s)
+//!
+//! As documented in detail the [readthedocs.io reference](https://elite-journal.readthedocs.io/en/latest),
+//! there are a number of files which the game itself updates and third-party tools sync through
+//! [EDDN](https://eddn.edcd.io) and other tools.
+//!
+//! - `Journal.<datestamp>.<part>.log` - [Incremental Player Journal](#incremental-player-journal)
+//! - `Status.json` TODO
+//! - `NavRoute.json` TODO
+//! - `Market.json` TODO
+//! - `Shipyard.json` TODO
+//! - `Outfitting.json` TODO
+//! - `ModulesInfo.json` TODO
+//!
+//! # Incremental Player Journal
+//!
+//! The `Journal.<datestamp>.<part>.log` files store a list of events in JSON lines format.
+//! The means that each line is a complete JSON object. Specifically, each object will have at
+//! least the following fields:
+//!
+//! - `timestamp`
+//! - `event`
+//!
+//! Matching on the `event` will determain the rest of the fields in the object.
+//!
+//! Each journal file will begin with a `Fileheader` event which in addition to some other
+//! metadata, also contains the `part` of the log. This, in addition to the ubiquitous `timestamp`
+//! makes parsing the filename unnecessary.
+
+mod journal;
+pub use self::journal::{
+    parse_file,
+    parse_dir,
+    travel,
+    startup,
+    Entry,
+    Event};
