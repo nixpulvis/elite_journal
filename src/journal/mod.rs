@@ -20,15 +20,12 @@ pub struct Entry {
 #[serde(tag = "event")]
 pub enum Event {
     Fileheader(startup::Fileheader),
-
-    // NOTE: I'm not in love with the 's' either.
-    Cargo(startup::Cargos),
+    Cargo(startup::Manifest),
     NewCommander(startup::NewCommander),
     ClearSavedGame(startup::Commander),
     Commander(startup::Commander),
     LoadGame(startup::LoadGame),
     Materials(startup::Materials),
-
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
 

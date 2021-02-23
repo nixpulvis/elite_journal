@@ -66,7 +66,7 @@ pub struct Ship {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
-pub struct Cargos {
+pub struct Manifest {
     pub vessel: Vessel,
     #[serde(default)]
     pub inventory: Vec<Cargo>,
