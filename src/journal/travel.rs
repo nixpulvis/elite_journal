@@ -29,6 +29,8 @@ pub struct FsdJump {
     pub factions: Vec<Faction>,
     #[serde(default)]
     pub conflicts: Vec<Conflict>,
+    pub powers: Option<Vec<String>>,
+    pub powerplay_state: Option<PowerplayState>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -91,4 +93,15 @@ pub struct ConflictProgress {
     pub name: String,
     pub stake: String,
     pub won_days: u8,
+}
+
+#[derive(Deserialize, Debug)]
+pub enum PowerplayState {
+    InPrepareRadius,
+    Prepared,
+    Exploited,
+    Contested,
+    Controlled,
+    Turmoil,
+    HomeSystem,
 }
