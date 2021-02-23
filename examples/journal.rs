@@ -1,4 +1,4 @@
-use elite_journal::{parse_dir, travel, Event};
+use elite_journal::{parse_dir, Event};
 
 fn main() {
     let entries = parse_dir("dumps/").unwrap();

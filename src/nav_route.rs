@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use serde::Deserialize;
-use chrono::prelude::*;
 use crate::{Entry, Coordinate};
 
 #[derive(Deserialize, Debug)]
