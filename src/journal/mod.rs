@@ -28,6 +28,7 @@ pub enum Event {
     Materials(startup::Materials),
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
+    Location(travel::Location),
 
     // TODO: We'll leave this in for sure... but we should test without it, and probably find a way
     // to add a generic JSON value to this.

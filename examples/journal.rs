@@ -6,17 +6,12 @@ fn main() {
     for entry in entries {
         // dbg!(entry.timestamp);
         match entry.event {
-            // Event::Fileheader { part, .. } => { dbg!(part); },
-            // Event::Cargo { vessel, inventory } => { dbg!(vessel, inventory); },
+            // Event::Fileheader(header) => { dbg!(header); },
+            // Event::Cargo(manifest) => { dbg!(manifest); },
             // Event::Commander(cmdr) => { dbg!(cmdr); },
-            // lg @ Event::LoadGame { .. } => { dbg!(lg); },
-            Event::FsdJump(travel::FsdJump { star_system, factions, star_pos, .. }) => {
-                // for faction in factions {
-                //     println!("{}: {:?}", star_system, faction.active_states);
-                // }
-
-                println!("{}: {:?}", star_system, star_pos);
-            }
+            // Event::LoadGame(lg) => { dbg!(lg); },
+            Event::FsdJump(fsdj) => { dbg!(fsdj); }
+            Event::Location(location) => { dbg!(location); }
             _ => {},
         }
     }
