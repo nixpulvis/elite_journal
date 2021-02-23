@@ -26,9 +26,13 @@ pub enum Event {
     Commander(startup::Commander),
     LoadGame(startup::LoadGame),
     Materials(startup::Materials),
+
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
     Location(travel::Location),
+
+    BuyExplorationData(exploration::BuyExplorationData),
+    SellExplorationData(exploration::SellExplorationData),
 
     // TODO: We'll leave this in for sure... but we should test without it, and probably find a way
     // to add a generic JSON value to this.
@@ -65,6 +69,4 @@ pub fn parse_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry>, Box<dyn Error>> 
 
 pub mod startup;
 pub mod travel;
-
-
-
+pub mod exploration;
