@@ -24,6 +24,32 @@ pub struct System {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
+pub struct Station {
+    pub dist_from_star_ls: Option<f64>,
+    pub station_name: String,
+    pub station_type: String,  // TODO: Enum?
+    #[serde(rename = "MarketID")]
+    pub market_id: u64,
+    pub station_faction: Faction,
+    pub station_government: String,  // TODO: Enum?
+    pub station_allegiance: Option<String>,  // TODO: Enum?
+    pub station_services: Vec<String>,  // TODO: Enums??
+    pub station_economies: Vec<Economy>,  // ???? (Array of (Name,Proportion) pairs )
+    // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
+    pub wanted: Option<bool>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Docked {
+    // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
+    pub active_fine: Option<bool>,
+    #[serde(flatten)]
+    pub station: Station,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
 pub struct FsdJump {
     #[serde(flatten)]
     pub system: System,
@@ -43,22 +69,11 @@ pub struct Location {
     #[serde(rename = "BodyID")]
     pub body_id: u64,
     pub body_type: String,  // TODO: Enum?
-    pub dist_from_star_ls: Option<f64>,
     pub latitude: Option<f64>,
     pub longitude: Option<f64>,
     pub docked: bool,
-    pub station_name: Option<String>,
-    pub station_type: Option<String>,  // TODO: Enum?
-    #[serde(rename = "MarketID")]
-    pub market_id: Option<u64>,
-
-    pub station_faction: Option<Faction>,
-    pub station_government: Option<String>,  // TODO: Enum?
-    pub station_allegiance: Option<String>,  // TODO: Enum?
-    pub station_services: Option<Vec<String>>,  // TODO: Enums??
-    pub station_economies: Option<Vec<Economy>>,  // ???? (Array of (Name,Proportion) pairs )
-
-    pub wanted: Option<bool>,
+    #[serde(flatten)]
+    pub station: Option<Station>,
 }
 
 #[derive(Deserialize, Debug)]

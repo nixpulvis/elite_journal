@@ -11,7 +11,8 @@ fn main() {
             // Event::Commander(cmdr) => { dbg!(cmdr); },
             // Event::LoadGame(lg) => { dbg!(lg); },
             Event::FsdJump(fsdj) => { dbg!(fsdj); }
-            Event::Location(location) => { dbg!(location); }
+            Event::Location(location) => { dbg!(location.station); }
+            Event::Docked(docked) => { dbg!(docked); }
             _ => {},
         }
     }
