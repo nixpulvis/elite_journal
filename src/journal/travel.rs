@@ -1,11 +1,5 @@
 use serde::Deserialize;
-
-#[derive(Deserialize, Debug)]
-pub struct Coordinate {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
+use crate::Coordinate;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]

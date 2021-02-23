@@ -27,11 +27,30 @@
 //! metadata, also contains the `part` of the log. This, in addition to the ubiquitous `timestamp`
 //! makes parsing the filename unnecessary.
 
+use serde::Deserialize;
+use chrono::prelude::*;
+
+/// A single log entry, containing an [`Event`]
+#[derive(Deserialize, Debug)]
+pub struct Entry<E> {
+    pub timestamp: DateTime<Utc>,
+    #[serde(flatten)]
+    pub event: E,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Coordinate {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+}
+
 mod journal;
 pub use self::journal::{
     parse_file,
     parse_dir,
     travel,
     startup,
-    Entry,
     Event};
+
+pub mod nav_route;

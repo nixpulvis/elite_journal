@@ -5,15 +5,8 @@ use std::error::Error;
 use std::ffi::OsStr;
 use serde::Deserialize;
 use chrono::prelude::*;
+use crate::Entry;
 
-
-/// A single log entry, containing an [`Event`]
-#[derive(Deserialize, Debug)]
-pub struct Entry {
-    pub timestamp: DateTime<Utc>,
-    #[serde(flatten)]
-    pub event: Event,
-}
 
 /// Information provided by the player journal
 #[derive(Deserialize, Debug)]
@@ -30,6 +23,8 @@ pub enum Event {
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
     Location(travel::Location),
+    /// Signals an update to the [`NavRoute.json`][crate::nav_route] file
+    NavRoute,
 
     BuyExplorationData(exploration::BuyExplorationData),
     SellExplorationData(exploration::SellExplorationData),
@@ -41,9 +36,10 @@ pub enum Event {
     Other,
 }
 
+// TODO: Our own error types.
 // TODO: add result inside vec too.
 // TODO: This should be an interator, since files are updates as the game runs.
-pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry>, Box<dyn Error>> {
+pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     Ok(reader.lines().map(|line| {
@@ -51,10 +47,10 @@ pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry>, Box<dyn Error>>
     }).collect())
 }
 
-
+// TODO: Our own error types.
 // TODO: add result inside vec too.
 // TODO: is there a way to stream this too? search for current running log files?
-pub fn parse_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry>, Box<dyn Error>> {
+pub fn parse_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
     let mut entries = Vec::new();
     for entry in read_dir(path)? {
         let entry = entry?;
