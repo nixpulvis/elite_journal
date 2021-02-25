@@ -4,16 +4,25 @@ use crate::Coordinate;
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct System {
-    pub star_system: String,
-    pub system_address: u64,
-    pub star_pos: Coordinate,
-    pub system_allegiance: String,
-    pub system_economy: String,
-    pub system_second_economy: String,
-    pub system_government: String,
-    pub system_security: String,
+    #[serde(rename = "StarSystem")]
+    pub name: String,
+    #[serde(rename = "SystemAddress")]
+    pub address: u64,
+    #[serde(rename = "StarPos")]
+    pub pos: Coordinate,
+    #[serde(rename = "SystemAllegiance")]
+    pub allegiance: String,
+    #[serde(rename = "SystemEconomy")]
+    pub economy: String,
+    #[serde(rename = "SystemSecondEconomy")]
+    pub second_economy: String,
+    #[serde(rename = "SystemGovernment")]
+    pub government: String,
+    #[serde(rename = "SystemSecurity")]
+    pub security: String,
     pub population: u64,
-    pub system_faction: Option<Faction>,
+    #[serde(rename = "SystemFaction")]
+    pub controlling_faction: Option<Faction>,
     #[serde(default)]
     pub factions: Vec<FactionInfo>,
     #[serde(default)]
