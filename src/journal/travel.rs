@@ -105,7 +105,7 @@ pub struct FactionInfo {
     #[serde(rename = "FactionState")]
     pub state: String,
     pub government: String,
-    pub influence: f64,
+    pub influence: f32,
     pub allegiance: String,
     pub happiness: String,
     #[serde(default)]
