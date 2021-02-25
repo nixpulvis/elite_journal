@@ -20,6 +20,8 @@ pub enum Event {
     Materials(startup::Materials),
 
     Docked(travel::Docked),
+    #[serde(rename = "FSDTarget")]
+    FsdTarget(travel::FsdTarget),
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
     Location(travel::Location),
