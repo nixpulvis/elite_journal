@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::Coordinate;
+use crate::{string_is_none, Coordinate};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -11,15 +11,20 @@ pub struct System {
     #[serde(rename = "StarPos")]
     pub pos: Coordinate,
     #[serde(rename = "SystemAllegiance")]
-    pub allegiance: String,
+    #[serde(deserialize_with = "string_is_none")]
+    pub allegiance: Option<String>,
     #[serde(rename = "SystemEconomy")]
-    pub economy: String,
+    #[serde(deserialize_with = "string_is_none")]
+    pub economy: Option<String>,
     #[serde(rename = "SystemSecondEconomy")]
-    pub second_economy: String,
+    #[serde(deserialize_with = "string_is_none")]
+    pub second_economy: Option<String>,
     #[serde(rename = "SystemGovernment")]
-    pub government: String,
+    #[serde(deserialize_with = "string_is_none")]
+    pub government: Option<String>,
     #[serde(rename = "SystemSecurity")]
-    pub security: String,
+    #[serde(deserialize_with = "string_is_none")]
+    pub security: Option<String>,
     pub population: u64,
     #[serde(rename = "SystemFaction")]
     pub controlling_faction: Option<Faction>,
