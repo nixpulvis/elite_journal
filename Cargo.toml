@@ -4,7 +4,11 @@ version = "0.0.0-dev+initial"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 edition = "2018"
 
+[features]
+sqlx-types = ["sqlx/runtime-async-std-native-tls"]
+
 [dependencies]
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 chrono = { version = "*", features = ["serde"] }
+sqlx = { version = "*", optional = true }

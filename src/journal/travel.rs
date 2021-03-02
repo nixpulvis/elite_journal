@@ -156,6 +156,7 @@ pub struct FactionConflictProgress {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Happiness {
     #[serde(rename = "$Faction_HappinessBand1;")]
@@ -173,6 +174,7 @@ pub enum Happiness {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Security {
     #[serde(rename = "$SYSTEM_SECURITY_high;")]
@@ -199,6 +201,7 @@ pub struct Economy {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum EconomyKind {
     #[serde(rename = "$economy_Agri;")]
@@ -233,6 +236,7 @@ pub enum EconomyKind {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Government {
     #[serde(alias = "$government_Anarchy;")]
@@ -269,6 +273,7 @@ pub enum Government {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Allegiance {
     Alliance,
@@ -284,6 +289,7 @@ pub enum Allegiance {
 }
 
 #[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,
     Prepared,

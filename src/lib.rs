@@ -27,6 +27,9 @@
 //! metadata, also contains the `part` of the log. This, in addition to the ubiquitous `timestamp`
 //! makes parsing the filename unnecessary.
 
+// https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
+#![allow(unused_braces)]
+
 use serde::Deserialize;
 use chrono::prelude::*;
 
