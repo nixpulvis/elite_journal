@@ -118,7 +118,7 @@ pub struct FactionInfo {
     pub government: String,
     pub influence: f32,
     pub allegiance: String,
-    pub happiness: String,
+    pub happiness: Happiness,
     #[serde(default)]
     pub pending_states: Vec<FactionStateTrend>,
     #[serde(default)]
@@ -158,6 +158,23 @@ pub struct FactionConflictProgress {
     pub name: String,
     pub stake: String,
     pub won_days: u8,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub enum Happiness {
+    #[serde(rename = "$Faction_HappinessBand1;")]
+    Elated,
+    #[serde(rename = "$Faction_HappinessBand2;")]
+    Happy,
+    #[serde(rename = "$Faction_HappinessBand3;")]
+    Discontented,
+    #[serde(rename = "$Faction_HappinessBand4;")]
+    Unhappy,
+    #[serde(rename = "$Faction_HappinessBand5;")]
+    Despondent,
+    #[serde(rename = "")]
+    None,
 }
 
 #[derive(Deserialize, Debug)]
