@@ -23,8 +23,7 @@ pub struct System {
     #[serde(deserialize_with = "string_is_none")]
     pub government: Option<String>,
     #[serde(rename = "SystemSecurity")]
-    #[serde(deserialize_with = "string_is_none")]
-    pub security: Option<String>,
+    pub security: Security,
     pub population: u64,
     #[serde(rename = "SystemFaction")]
     pub controlling_faction: Option<Faction>,
@@ -176,6 +175,26 @@ pub enum Happiness {
     #[serde(rename = "")]
     None,
 }
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub enum Security {
+    #[serde(rename = "$SYSTEM_SECURITY_high;")]
+    #[serde(alias = "$GAlAXY_MAP_INFO_state_high;")]
+    High,
+    #[serde(rename = "$SYSTEM_SECURITY_medium;")]
+    #[serde(alias = "$GAlAXY_MAP_INFO_state_medium;")]
+    Medium,
+    #[serde(rename = "$SYSTEM_SECURITY_low;")]
+    #[serde(alias = "$GAlAXY_MAP_INFO_state_low;")]
+    Low,
+    #[serde(rename = "$SYSTEM_SECURITY_anarchy;")]
+    #[serde(alias = "$GAlAXY_MAP_INFO_state_anarchy;")]
+    Anarchy,
+    #[serde(rename = "")]
+    None,
+}
+
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
