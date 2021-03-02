@@ -18,8 +18,7 @@ pub struct System {
     #[serde(rename = "SystemSecondEconomy")]
     pub second_economy: EconomyKind,
     #[serde(rename = "SystemGovernment")]
-    #[serde(deserialize_with = "string_is_none")]
-    pub government: Option<String>,
+    pub government: Government,
     #[serde(rename = "SystemSecurity")]
     pub security: Security,
     pub population: u64,
@@ -42,7 +41,7 @@ pub struct Station {
     #[serde(rename = "MarketID")]
     pub market_id: u64,
     pub station_faction: Faction,
-    pub station_government: String,  // TODO: Enum?
+    pub station_government: Government,
     pub station_allegiance: Option<String>,  // TODO: Enum?
     pub station_services: Vec<String>,  // TODO: Enums??
     pub station_economies: Vec<Economy>,  // ???? (Array of (Name,Proportion) pairs )
@@ -112,7 +111,7 @@ pub struct FactionInfo {
     pub name: String,
     #[serde(rename = "FactionState")]
     pub state: String,
-    pub government: String,
+    pub government: Government,
     pub influence: f32,
     pub allegiance: String,
     pub happiness: Happiness,
@@ -231,6 +230,42 @@ pub enum EconomyKind {
     Undefined,
     #[serde(rename = "")]
     #[serde(alias = "$economy_None;")]
+    None,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub enum Government {
+    #[serde(alias = "$government_Anarchy;")]
+    Anarchy,
+    #[serde(alias = "$government_Communism;")]
+    Communism,
+    #[serde(alias = "$government_Confederacy;")]
+    Confederacy,
+    #[serde(alias = "$government_Cooperative;")]
+    Cooperative,
+    #[serde(alias = "$government_Corporate;")]
+    Corporate,
+    #[serde(alias = "$government_Democracy;")]
+    Democracy,
+    #[serde(alias = "$government_Dictatorship;")]
+    Dictatorship,
+    #[serde(alias = "$government_Feudal;")]
+    Feudal,
+    #[serde(alias = "$government_Patronage;")]
+    Patronage,
+    #[serde(alias = "$government_Prison;")]
+    Prison,
+    #[serde(alias = "$government_PrisonColony;")]
+    PrisonColony,
+    #[serde(alias = "$government_Theocracy;")]
+    Theocracy,
+    #[serde(alias = "$government_Engineer;")]
+    Engineer,
+    #[serde(alias = "$government_Carrier;")]
+    Carrier,
+    #[serde(rename = "")]
+    #[serde(alias = "$government_None;")]
     None,
 }
 
