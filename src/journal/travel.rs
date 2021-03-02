@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::{string_is_none, Coordinate};
+use crate::Coordinate;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -11,8 +11,7 @@ pub struct System {
     #[serde(rename = "StarPos")]
     pub pos: Coordinate,
     #[serde(rename = "SystemAllegiance")]
-    #[serde(deserialize_with = "string_is_none")]
-    pub allegiance: Option<String>,
+    pub allegiance: Allegiance,
     #[serde(rename = "SystemEconomy")]
     pub economy: EconomyKind,
     #[serde(rename = "SystemSecondEconomy")]
@@ -42,9 +41,9 @@ pub struct Station {
     pub market_id: u64,
     pub station_faction: Faction,
     pub station_government: Government,
-    pub station_allegiance: Option<String>,  // TODO: Enum?
+    pub station_allegiance: Option<Allegiance>,
     pub station_services: Vec<String>,  // TODO: Enums??
-    pub station_economies: Vec<Economy>,  // ???? (Array of (Name,Proportion) pairs )
+    pub station_economies: Vec<Economy>,
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
     pub wanted: Option<bool>,
 }
@@ -113,7 +112,7 @@ pub struct FactionInfo {
     pub state: String,
     pub government: Government,
     pub influence: f32,
-    pub allegiance: String,
+    pub allegiance: Allegiance,
     pub happiness: Happiness,
     #[serde(default)]
     pub pending_states: Vec<FactionStateTrend>,
@@ -266,6 +265,21 @@ pub enum Government {
     Carrier,
     #[serde(rename = "")]
     #[serde(alias = "$government_None;")]
+    None,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub enum Allegiance {
+    Alliance,
+    Empire,
+    Federation,
+    Guardian,
+    Independent,
+    PilotsFederation,
+    PlayerPilots,
+    Thargoid,
+    #[serde(rename = "")]
     None,
 }
 
