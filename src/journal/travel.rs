@@ -14,11 +14,9 @@ pub struct System {
     #[serde(deserialize_with = "string_is_none")]
     pub allegiance: Option<String>,
     #[serde(rename = "SystemEconomy")]
-    #[serde(deserialize_with = "string_is_none")]
-    pub economy: Option<String>,
+    pub economy: EconomyKind,
     #[serde(rename = "SystemSecondEconomy")]
-    #[serde(deserialize_with = "string_is_none")]
-    pub second_economy: Option<String>,
+    pub second_economy: EconomyKind,
     #[serde(rename = "SystemGovernment")]
     #[serde(deserialize_with = "string_is_none")]
     pub government: Option<String>,
@@ -195,12 +193,45 @@ pub enum Security {
     None,
 }
 
-
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Economy {
-    pub name: String,
+    pub name: EconomyKind,
     pub proportion: f64,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub enum EconomyKind {
+    #[serde(rename = "$economy_Agri;")]
+    Agriculture,
+    #[serde(rename = "$economy_Colony;")]
+    Colony,
+    #[serde(rename = "$economy_Extraction;")]
+    Extraction,
+    #[serde(rename = "$economy_HighTech;")]
+    HighTech,
+    #[serde(rename = "$economy_Industrial;")]
+    Industrial,
+    #[serde(rename = "$economy_Military;")]
+    Military,
+    #[serde(rename = "$economy_Refinery;")]
+    Refinery,
+    #[serde(rename = "$economy_Service;")]
+    Service,
+    #[serde(rename = "$economy_Terraforming;")]
+    Terraforming,
+    #[serde(rename = "$economy_Tourism;")]
+    Tourism,
+    #[serde(rename = "$economy_Carrier;")]
+    Carrier,
+    #[serde(rename = "$economy_Prison;")]
+    Prison,
+    #[serde(rename = "$economy_Undefined;")]
+    Undefined,
+    #[serde(rename = "")]
+    #[serde(alias = "$economy_None;")]
+    None,
 }
 
 #[derive(Deserialize, Debug)]
