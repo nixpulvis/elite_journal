@@ -66,11 +66,11 @@ pub struct Docked {
 #[serde(rename_all = "PascalCase")]
 pub struct FsdTarget {
     #[serde(rename = "SystemAddress")]
-    address: String,
+    address: u64,
     name: String,
     star_class: String,  // TODO: Enum?
     #[serde(rename = "RemainingJumpsInRoute")]
-    remaining: u16,
+    remaining: Option<u16>,
 }
 
 #[derive(Deserialize, Debug)]
