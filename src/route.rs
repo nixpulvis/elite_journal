@@ -4,6 +4,7 @@ use std::path::Path;
 use serde::Deserialize;
 use crate::{Entry, Coordinate};
 
+// Single variant enum to satify serde for the shape of the data inside an [`Entry`].
 #[derive(Deserialize, Debug)]
 pub enum Route {
     Route(Vec<Destination>)

@@ -1,19 +1,17 @@
-use elite_journal::{parse_dir, Event};
+use elite_journal::incremental::{parse_dir, Event};
 
 fn main() {
     let entries = parse_dir("dumps/").unwrap();
-    dbg!(entries.len());
-    for entry in entries {
-        // dbg!(entry.timestamp);
-        match entry.event {
-            // Event::Fileheader(header) => { dbg!(header); },
-            // Event::Cargo(manifest) => { dbg!(manifest); },
-            // Event::Commander(cmdr) => { dbg!(cmdr); },
-            // Event::LoadGame(lg) => { dbg!(lg); },
-            Event::FsdJump(fsdj) => { dbg!(fsdj); }
-            Event::Location(location) => { dbg!(location.station); }
-            Event::Docked(docked) => { dbg!(docked); }
-            _ => {},
+
+    // Print all FSDJumps to Sol.
+    for entry in entries.iter() {
+        if let Event::FsdJump(event) = &entry.event {
+            if event.system.name == "Sol" {
+                println!("{}", entry.timestamp);
+                println!("{:#?}", event);
+            }
         }
     }
+
+    println!("total log count: {}.", entries.len());
 }

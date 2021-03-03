@@ -26,3 +26,5 @@ pub struct SellExplorationData {
     /// Other factors are things like the 200% Li Yong Rui bonus.
     pub total_earnings: u64,
 }
+
+// TODO: Scan next

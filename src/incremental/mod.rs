@@ -25,7 +25,7 @@ pub enum Event {
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
     Location(travel::Location),
-    /// Signals an update to the [`NavRoute.json`][crate::nav_route] file
+    /// Signals an update to the [`NavRoute.json`][crate::route] file
     NavRoute,
 
     BuyExplorationData(exploration::BuyExplorationData),
