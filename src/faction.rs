@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use crate::{
-    enum_is_null,
+    de,
     Nullable,
     Government,
     Allegiance,
@@ -23,7 +23,7 @@ pub struct FactionInfo {
     pub government: Government,
     pub influence: f32,
     pub allegiance: Allegiance,
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "de::enum_is_null")]
     pub happiness: Option<Happiness>,
     #[serde(default)]
     pub pending_states: Vec<FactionStateTrend>,

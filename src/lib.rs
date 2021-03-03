@@ -41,7 +41,7 @@
 // https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
 #![allow(unused_braces)]
 
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 use chrono::prelude::*;
 
 /// `Journal.<timestamp>.<part>.log`
@@ -56,13 +56,16 @@ mod coordinate;
 pub use self::coordinate::Coordinate;
 
 mod system;
-pub use self::system::{System, PowerplayState};
+pub use self::system::{System, Security, PowerplayState};
 
 mod faction;
 pub use self::faction::{Faction, FactionInfo, FactionStateTrend, FactionConflict, FactionConflictProgress};
 
 mod station;
 pub use self::station::{Station, EconomyShare};
+
+/// Serde helper deserializers
+pub mod de;
 
 /// A single timestamped entry, containing an [`Event`], [`Route`], etc.
 ///
@@ -110,6 +113,7 @@ pub enum Government {
     #[serde(alias = "$government_Prison;")]
     Prison,
     #[serde(alias = "$government_PrisonColony;")]
+    #[serde(alias = "Prison Colony")]
     PrisonColony,
     #[serde(alias = "$government_Theocracy;")]
     Theocracy,
@@ -117,7 +121,7 @@ pub enum Government {
     Engineer,
     #[serde(alias = "$government_Carrier;")]
     Carrier,
-    #[serde(rename = "")]
+    #[serde(alias = "")]
     #[serde(alias = "$government_None;")]
     None,
 }
@@ -140,10 +144,11 @@ pub enum Allegiance {
     Federation,
     Guardian,
     Independent,
+    #[serde(alias = "Pilots Federation")]
     PilotsFederation,
     PlayerPilots,
     Thargoid,
-    #[serde(rename = "")]
+    #[serde(alias = "")]
     None,
 }
 
@@ -160,33 +165,34 @@ impl Nullable for Allegiance {
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Economy {
-    #[serde(rename = "$economy_Agri;")]
+    #[serde(alias = "$economy_Agri;")]
     Agriculture,
-    #[serde(rename = "$economy_Colony;")]
+    #[serde(alias = "$economy_Colony;")]
     Colony,
-    #[serde(rename = "$economy_Extraction;")]
+    #[serde(alias = "$economy_Extraction;")]
     Extraction,
-    #[serde(rename = "$economy_HighTech;")]
+    #[serde(alias = "$economy_HighTech;")]
+    #[serde(alias = "High Tech")]
     HighTech,
-    #[serde(rename = "$economy_Industrial;")]
+    #[serde(alias = "$economy_Industrial;")]
     Industrial,
-    #[serde(rename = "$economy_Military;")]
+    #[serde(alias = "$economy_Military;")]
     Military,
-    #[serde(rename = "$economy_Refinery;")]
+    #[serde(alias = "$economy_Refinery;")]
     Refinery,
-    #[serde(rename = "$economy_Service;")]
+    #[serde(alias = "$economy_Service;")]
     Service,
-    #[serde(rename = "$economy_Terraforming;")]
+    #[serde(alias = "$economy_Terraforming;")]
     Terraforming,
-    #[serde(rename = "$economy_Tourism;")]
+    #[serde(alias = "$economy_Tourism;")]
     Tourism,
-    #[serde(rename = "$economy_Carrier;")]
+    #[serde(alias = "$economy_Carrier;")]
     Carrier,
-    #[serde(rename = "$economy_Prison;")]
+    #[serde(alias = "$economy_Prison;")]
     Prison,
-    #[serde(rename = "$economy_Undefined;")]
+    #[serde(alias = "$economy_Undefined;")]
     Undefined,
-    #[serde(rename = "")]
+    #[serde(alias = "")]
     #[serde(alias = "$economy_None;")]
     None,
 }
@@ -197,16 +203,5 @@ impl Nullable for Economy {
             Economy::None => true,
             _ => false,
         }
-    }
-}
-
-fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D) -> Result<Option<T>, D::Error>
-where D: Deserializer<'d>,
-{
-    let variant = T::deserialize(deserializer)?;
-    if variant .is_null() {
-        Ok(None)
-    } else {
-        Ok(Some(variant))
     }
 }
