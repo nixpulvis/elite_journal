@@ -52,6 +52,9 @@ pub use self::incremental::Event;
 pub mod route;
 pub use self::route::Route;
 
+mod coordinate;
+pub use self::coordinate::Coordinate;
+
 mod system;
 pub use self::system::{System, PowerplayState};
 
@@ -78,16 +81,8 @@ pub struct Entry<E> {
     pub event: E,
 }
 
-// TODO: Merge with PointZ from galos_db
 #[derive(Deserialize, Debug)]
-pub struct Coordinate {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
-
-#[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Government {
     #[serde(alias = "$government_Anarchy;")]
@@ -124,7 +119,7 @@ pub enum Government {
 }
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Allegiance {
     Alliance,
@@ -140,7 +135,7 @@ pub enum Allegiance {
 }
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Economy {
     #[serde(rename = "$economy_Agri;")]

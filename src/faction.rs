@@ -64,7 +64,7 @@ pub struct FactionConflictProgress {
 }
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Happiness {
     #[serde(rename = "$Faction_HappinessBand1;")]

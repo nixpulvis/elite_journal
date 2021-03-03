@@ -5,10 +5,12 @@ authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 edition = "2018"
 
 [features]
-sqlx-types = ["sqlx/runtime-async-std-native-tls"]
+with-sqlx = ["sqlx/runtime-async-std-native-tls"]
+with-postgis-sqlx = ["with-sqlx", "geozero/with-wkb", "geozero/with-postgis-sqlx"]
 
 [dependencies]
-serde = { version = "*", features = ["derive"] }
+serde      = { version = "*", features = ["derive"] }
 serde_json = "*"
-chrono = { version = "*", features = ["serde"] }
-sqlx = { version = "*", optional = true }
+chrono     = { version = "*", features = ["serde"] }
+sqlx       = { version = "*", optional = true }
+geozero    = { git = "https://github.com/georust/geozero", branch = "master" }

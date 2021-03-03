@@ -44,7 +44,7 @@ pub struct System {
 }
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Security {
     #[serde(rename = "$SYSTEM_SECURITY_high;")]
@@ -64,7 +64,7 @@ pub enum Security {
 }
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "sqlx-types", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,
     Prepared,
