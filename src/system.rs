@@ -21,7 +21,8 @@ pub struct System {
     #[serde(rename = "StarSystem")]
     pub name: String,
 
-    pub population: u64,
+    #[serde(deserialize_with = "de::zero_is_none")]
+    pub population: Option<u64>,
     #[serde(rename = "SystemSecurity")]
     #[serde(deserialize_with = "de::enum_is_null")]
     pub security: Option<Security>,

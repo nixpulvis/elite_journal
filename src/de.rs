@@ -1,8 +1,9 @@
 use serde::{Deserialize, Deserializer};
 use crate::Nullable;
 
-pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D) -> Result<Option<T>, D::Error>
-where D: Deserializer<'d>,
+pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
+    -> Result<Option<T>, D::Error>
+    where D: Deserializer<'d>,
 {
     let variant = Option::<T>::deserialize(deserializer)?;
     if let Some(v) = variant {
@@ -13,5 +14,17 @@ where D: Deserializer<'d>,
         }
     } else {
         Ok(None)
+    }
+}
+
+pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(deserializer: D)
+    -> Result<Option<T>, D::Error>
+    where D: Deserializer<'d>,
+{
+    let number = T::deserialize(deserializer)?;
+    if number == 0 {
+        Ok(None)
+    } else {
+        Ok(Some(number))
     }
 }
