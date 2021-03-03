@@ -11,7 +11,7 @@ use crate::{
 pub struct Faction {
     pub name: String,
     #[serde(rename = "FactionState")]
-    pub state: Option<String>,
+    pub state: Option<State>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -19,18 +19,18 @@ pub struct Faction {
 pub struct FactionInfo {
     pub name: String,
     #[serde(rename = "FactionState")]
-    pub state: String,
+    pub state: State,
     pub government: Government,
     pub influence: f32,
     pub allegiance: Allegiance,
     #[serde(deserialize_with = "de::enum_is_null")]
     pub happiness: Option<Happiness>,
     #[serde(default)]
-    pub pending_states: Vec<FactionStateTrend>,
+    pub pending_states: Vec<StateTrend>,
     #[serde(default)]
-    pub active_states: Vec<FactionStateTrend>,
+    pub active_states: Vec<StateTrend>,
     #[serde(default)]
-    pub recovering_states: Vec<FactionStateTrend>,
+    pub recovering_states: Vec<StateTrend>,
     // EDDN optional only?
     #[serde(rename = "MyReputation")]
     pub reputation: Option<f64>,
@@ -44,26 +44,73 @@ pub struct FactionInfo {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct FactionStateTrend {
-    pub state: String,
+pub struct StateTrend {
+    pub state: State,
     pub trend: Option<u8>,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
-pub struct FactionConflict {
+pub struct Conflict {
     pub war_type: String,
     pub status: String,
-    pub faction_1: FactionConflictProgress,
-    pub faction_2: FactionConflictProgress,
+    pub faction_1: ConflictProgress,
+    pub faction_2: ConflictProgress,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
-pub struct FactionConflictProgress {
+pub struct ConflictProgress {
     pub name: String,
     pub stake: String,
     pub won_days: u8,
+}
+
+
+#[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[serde(rename_all = "PascalCase")]
+pub enum State {
+    Blight,
+    Boom,
+    Bust,
+    #[serde(alias = "Civil Liberty")]
+    CivilLiberty,
+    #[serde(alias = "Civil Unrest")]
+    CivilUnrest,
+    #[serde(alias = "Civil War")]
+    CivilWar,
+    #[serde(alias = "Cold War")]
+    ColdWar,
+    Colonisation,
+    Drought,
+    Election,
+    Expansion,
+    Famine,
+    #[serde(alias = "Historic Event")]
+    HistoricEvent,
+    #[serde(alias = "Infrastructure Failure")]
+    InfrastructureFailure,
+    Investment,
+    Lockdown,
+    #[serde(alias = "Natural Disaster")]
+    NaturalDisaster,
+    Outbreak,
+    #[serde(alias = "Pirate Attack")]
+    PirateAttack,
+    #[serde(alias = "Public Holiday")]
+    PublicHoliday,
+    Retreat,
+    Revolution,
+    #[serde(alias = "Technological Leap")]
+    TechnologicalLeap,
+    #[serde(alias = "Terrorist Attack")]
+    Terrorism,
+    #[serde(alias = "Trade War")]
+    TradeWar,
+    War,
+    #[serde(alias = "")]
+    None
 }
 
 #[derive(Deserialize, Debug)]

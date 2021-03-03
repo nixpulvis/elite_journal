@@ -59,7 +59,14 @@ mod system;
 pub use self::system::{System, Security, PowerplayState};
 
 mod faction;
-pub use self::faction::{Faction, FactionInfo, FactionStateTrend, FactionConflict, FactionConflictProgress};
+pub use self::faction::{
+    Faction,
+    FactionInfo,
+    State,
+    StateTrend,
+    Conflict,
+    ConflictProgress,
+};
 
 mod station;
 pub use self::station::{Station, EconomyShare};
