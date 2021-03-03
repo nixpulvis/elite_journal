@@ -41,7 +41,7 @@
 // https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
 #![allow(unused_braces)]
 
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use chrono::prelude::*;
 
 /// `Journal.<timestamp>.<part>.log`
@@ -81,6 +81,10 @@ pub struct Entry<E> {
     pub event: E,
 }
 
+pub trait Nullable {
+    fn is_null(&self) -> bool;
+}
+
 #[derive(Deserialize, Debug)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
@@ -118,6 +122,15 @@ pub enum Government {
     None,
 }
 
+impl Nullable for Government {
+    fn is_null(&self) -> bool {
+        match self {
+            Government::None => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Deserialize, Debug)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
@@ -132,6 +145,15 @@ pub enum Allegiance {
     Thargoid,
     #[serde(rename = "")]
     None,
+}
+
+impl Nullable for Allegiance {
+    fn is_null(&self) -> bool {
+        match self {
+            Allegiance::None => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -167,4 +189,24 @@ pub enum Economy {
     #[serde(rename = "")]
     #[serde(alias = "$economy_None;")]
     None,
+}
+
+impl Nullable for Economy {
+    fn is_null(&self) -> bool {
+        match self {
+            Economy::None => true,
+            _ => false,
+        }
+    }
+}
+
+fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D) -> Result<Option<T>, D::Error>
+where D: Deserializer<'d>,
+{
+    let variant = T::deserialize(deserializer)?;
+    if variant .is_null() {
+        Ok(None)
+    } else {
+        Ok(Some(variant))
+    }
 }

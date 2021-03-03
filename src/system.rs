@@ -1,5 +1,7 @@
 use serde::Deserialize;
 use crate::{
+    enum_is_null,
+    Nullable,
     Coordinate,
     Government,
     Allegiance,
@@ -21,16 +23,21 @@ pub struct System {
 
     pub population: u64,
     #[serde(rename = "SystemSecurity")]
-    pub security: Security,
+    #[serde(deserialize_with = "enum_is_null")]
+    pub security: Option<Security>,
 
     #[serde(rename = "SystemGovernment")]
-    pub government: Government,
+    #[serde(deserialize_with = "enum_is_null")]
+    pub government: Option<Government>,
     #[serde(rename = "SystemAllegiance")]
-    pub allegiance: Allegiance,
+    #[serde(deserialize_with = "enum_is_null")]
+    pub allegiance: Option<Allegiance>,
     #[serde(rename = "SystemEconomy")]
-    pub economy: Economy,
+    #[serde(deserialize_with = "enum_is_null")]
+    pub economy: Option<Economy>,
     #[serde(rename = "SystemSecondEconomy")]
-    pub second_economy: Economy,
+    #[serde(deserialize_with = "enum_is_null")]
+    pub second_economy: Option<Economy>,
 
     #[serde(rename = "SystemFaction")]
     pub controlling_faction: Option<Faction>,
@@ -61,6 +68,16 @@ pub enum Security {
     Anarchy,
     #[serde(rename = "")]
     None,
+}
+
+impl Nullable for Security {
+    fn is_null(&self) -> bool {
+        match self {
+            Security::None => true,
+            Security::Anarchy => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]

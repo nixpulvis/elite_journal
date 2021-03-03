@@ -1,5 +1,7 @@
 use serde::Deserialize;
 use crate::{
+    enum_is_null,
+    Nullable,
     Government,
     Allegiance,
 };
@@ -21,7 +23,8 @@ pub struct FactionInfo {
     pub government: Government,
     pub influence: f32,
     pub allegiance: Allegiance,
-    pub happiness: Happiness,
+    #[serde(deserialize_with = "enum_is_null")]
+    pub happiness: Option<Happiness>,
     #[serde(default)]
     pub pending_states: Vec<FactionStateTrend>,
     #[serde(default)]
@@ -79,4 +82,13 @@ pub enum Happiness {
     Despondent,
     #[serde(rename = "")]
     None,
+}
+
+impl Nullable for Happiness {
+    fn is_null(&self) -> bool {
+        match self {
+            Happiness::None => true,
+            _ => false,
+        }
+    }
 }
