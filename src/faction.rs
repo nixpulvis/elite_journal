@@ -11,6 +11,8 @@ use crate::{
 pub struct Faction {
     pub name: String,
     #[serde(rename = "FactionState")]
+    #[serde(default)]
+    #[serde(deserialize_with = "de::enum_is_null")]
     pub state: Option<State>,
 }
 
@@ -19,7 +21,8 @@ pub struct Faction {
 pub struct FactionInfo {
     pub name: String,
     #[serde(rename = "FactionState")]
-    pub state: State,
+    #[serde(deserialize_with = "de::enum_is_null")]
+    pub state: Option<State>,
     pub government: Government,
     pub influence: f32,
     pub allegiance: Allegiance,
@@ -111,6 +114,15 @@ pub enum State {
     War,
     #[serde(alias = "")]
     None
+}
+
+impl Nullable for State {
+    fn is_null(&self) -> bool {
+        match self {
+            State::None => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
