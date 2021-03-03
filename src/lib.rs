@@ -84,7 +84,7 @@ pub mod de;
 /// - TODO `Shipyard.json`
 /// - TODO `Outfitting.json`
 /// - TODO `ModulesInfo.json`
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct Entry<E> {
     pub timestamp: DateTime<Utc>,
     #[serde(flatten)]
@@ -95,7 +95,7 @@ pub trait Nullable {
     fn is_null(&self) -> bool;
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Government {
@@ -142,7 +142,7 @@ impl Nullable for Government {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Allegiance {
@@ -168,7 +168,7 @@ impl Nullable for Allegiance {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Economy {

@@ -6,7 +6,7 @@ use crate::{
     Allegiance,
 };
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Faction {
     pub name: String,
@@ -16,7 +16,7 @@ pub struct Faction {
     pub state: Option<State>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionInfo {
     pub name: String,
@@ -45,14 +45,14 @@ pub struct FactionInfo {
     pub happiest_system: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct StateTrend {
     pub state: State,
     pub trend: Option<u8>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Conflict {
     pub war_type: String,
@@ -61,7 +61,7 @@ pub struct Conflict {
     pub faction_2: ConflictProgress,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct ConflictProgress {
     pub name: String,
@@ -70,7 +70,7 @@ pub struct ConflictProgress {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum State {
@@ -125,7 +125,7 @@ impl Nullable for State {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Happiness {

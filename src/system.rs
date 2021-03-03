@@ -11,7 +11,7 @@ use crate::{
     Conflict,
 };
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct System {
     #[serde(rename = "SystemAddress")]
@@ -52,7 +52,7 @@ pub struct System {
     pub powerplay_state: Option<PowerplayState>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Security {
@@ -82,7 +82,7 @@ impl Nullable for Security {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,

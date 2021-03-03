@@ -5,12 +5,12 @@ use serde::Deserialize;
 use crate::{Entry, Coordinate};
 
 // Single variant enum to satify serde for the shape of the data inside an [`Entry`].
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub enum Route {
     Route(Vec<Destination>)
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Destination {
     star_system: String,  // TODO: actually a system_address, might change name.
