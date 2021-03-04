@@ -1,6 +1,7 @@
 use serde::{Deserialize, Deserializer};
 use crate::Nullable;
 
+// TODO: tests
 pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
     -> Result<Option<T>, D::Error>
     where D: Deserializer<'d>,
@@ -17,6 +18,7 @@ pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
     }
 }
 
+// TODO: tests
 pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(deserializer: D)
     -> Result<Option<T>, D::Error>
     where D: Deserializer<'d>,

@@ -91,11 +91,49 @@ pub struct Entry<E> {
     pub event: E,
 }
 
+#[test]
+fn entry() {
+    #[derive(Deserialize)]
+    enum Dumb { Foo }
+    assert!(serde_json::from_str::<Entry<Dumb>>(r#"
+        {
+            "timestamp": "1970-01-01T00:00:00Z",
+            "Foo": null
+        }
+    "#).is_ok());
+    #[derive(Deserialize)]
+    #[serde(rename_all = "PascalCase")]
+    #[allow(unused)]
+    struct Dumber {
+        key: (),
+    }
+    assert!(serde_json::from_str::<Entry<Dumber>>(r#"
+        {
+            "timestamp": "1970-01-01T00:00:00Z",
+            "Key": null
+        }
+    "#).is_ok());
+    #[derive(Deserialize)]
+    #[serde(rename_all = "PascalCase")]
+    #[allow(unused)]
+    struct Dumbest {
+        key: Government,
+    }
+    assert!(serde_json::from_str::<Entry<Dumbest>>(r#"
+        {
+            "timestamp": "1970-01-01T00:00:00Z",
+            "Key": "Anarchy"
+        }
+    "#).is_ok());
+}
+
+
 pub trait Nullable {
     fn is_null(&self) -> bool;
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+
+#[derive(Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Government {
@@ -142,7 +180,33 @@ impl Nullable for Government {
     }
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+impl PartialEq for Government {
+    fn eq(&self, other: &Self) -> bool {
+        match (*other, *self) {
+            (Government::None, Government::None) => false,
+            (l, r) => l as u8 == r as u8,
+        }
+    }
+}
+
+#[test]
+fn government() {
+    let high_tech = serde_json::from_str(r#"
+        "Prison Colony"
+    "#).unwrap();
+    assert_eq!(Government::PrisonColony, high_tech);
+    let extraction = serde_json::from_str(r#"
+        "$government_Dictatorship;"
+    "#).unwrap();
+    assert_eq!(Government::Dictatorship, extraction);
+    assert!(Government::None != Government::None);
+    assert!(serde_json::from_str::<Government>(r#""$government_None;""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Government>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Government>(r#""""#).unwrap().is_null());
+}
+
+
+#[derive(Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Allegiance {
@@ -168,7 +232,32 @@ impl Nullable for Allegiance {
     }
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+impl PartialEq for Allegiance {
+    fn eq(&self, other: &Self) -> bool {
+        match (*other, *self) {
+            (Allegiance::None, Allegiance::None) => false,
+            (l, r) => l as u8 == r as u8,
+        }
+    }
+}
+
+#[test]
+fn allegiance() {
+    let pilots_federation = serde_json::from_str(r#"
+        "Pilots Federation"
+    "#).unwrap();
+    assert_eq!(Allegiance::PilotsFederation, pilots_federation);
+    let player_pilots = serde_json::from_str(r#"
+        "PlayerPilots"
+    "#).unwrap();
+    assert_eq!(Allegiance::PlayerPilots, player_pilots);
+    assert!(Allegiance::None != Allegiance::None);
+    assert!(serde_json::from_str::<Allegiance>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Allegiance>(r#""""#).unwrap().is_null());
+}
+
+
+#[derive(Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Economy {
@@ -211,4 +300,29 @@ impl Nullable for Economy {
             _ => false,
         }
     }
+}
+
+impl PartialEq for Economy {
+    fn eq(&self, other: &Self) -> bool {
+        match (*other, *self) {
+            (Economy::None, Economy::None) => false,
+            (l, r) => l as u8 == r as u8,
+        }
+    }
+}
+
+#[test]
+fn economy() {
+    let high_tech = serde_json::from_str(r#"
+        "High Tech"
+    "#).unwrap();
+    assert_eq!(Economy::HighTech, high_tech);
+    let extraction = serde_json::from_str(r#"
+        "$economy_Extraction;"
+    "#).unwrap();
+    assert_eq!(Economy::Extraction, extraction);
+    assert!(Economy::None != Economy::None);
+    assert!(serde_json::from_str::<Economy>(r#""$economy_None;""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Economy>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Economy>(r#""""#).unwrap().is_null());
 }

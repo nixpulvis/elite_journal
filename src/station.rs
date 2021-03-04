@@ -6,7 +6,7 @@ use crate::{
     Faction,
 };
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Station {
     pub dist_from_star_ls: Option<f64>,
@@ -23,7 +23,7 @@ pub struct Station {
     pub wanted: Option<bool>,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct EconomyShare {
     pub name: Economy,
