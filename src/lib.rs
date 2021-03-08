@@ -64,8 +64,11 @@ pub use self::faction::{
     FactionInfo,
     FactionConflict,
     FactionConflictProgress,
+    ConflictType,
+    ConflictStatus,
     State,
     StateTrend,
+    Happiness,
 };
 
 mod station;

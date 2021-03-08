@@ -181,9 +181,10 @@ fn state_trend() {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionConflict {
-    pub war_type: String,
+    pub war_type: ConflictType,
     // TODO: What about "", I've seen it but what does it mean?
-    pub status: String,
+    #[serde(deserialize_with = "de::enum_is_null")]
+    pub status: Option<ConflictStatus>,
     pub faction_1: FactionConflictProgress,
     pub faction_2: FactionConflictProgress,
 }
@@ -198,6 +199,81 @@ fn conflict() {
             "Faction2": { "Name": "Faction A", "Stake": "Installation X", "WonDays": 2 }
         }
     "#).is_ok());
+}
+
+
+#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", sqlx(type_name = "Conflict"))]
+pub enum ConflictType {
+    #[serde(rename = "war")]
+    War,
+    #[serde(rename = "civilwar")]
+    CivilWar,
+    #[serde(rename = "election")]
+    Election,
+}
+
+#[test]
+fn conflict_type() {
+    let war = serde_json::from_str(r#""war""#).unwrap();
+    let civil_war = serde_json::from_str(r#""civilwar""#).unwrap();
+    let election = serde_json::from_str(r#""election""#).unwrap();
+    assert_eq!(ConflictType::War, war);
+    assert_eq!(ConflictType::CivilWar, civil_war);
+    assert_eq!(ConflictType::Election, election);
+}
+
+
+#[derive(Deserialize, Debug, Copy, Clone)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", sqlx(type_name = "Status"))]
+pub enum ConflictStatus {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "pending")]
+    Pending,
+    #[serde(rename = "")]
+    None,
+}
+
+impl Nullable for ConflictStatus {
+    fn is_null(&self) -> bool {
+        match self {
+            ConflictStatus::None => true,
+            _ => false,
+        }
+    }
+}
+
+impl PartialEq for ConflictStatus {
+    fn eq(&self, other: &Self) -> bool {
+        match (*other, *self) {
+            (ConflictStatus::None, ConflictStatus::None) => false,
+            (l, r) => l as u8 == r as u8,
+        }
+    }
+}
+
+impl PartialOrd for ConflictStatus {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.is_null() || other.is_null() { return None }
+        (*other as u8).partial_cmp(&(*self as u8))
+    }
+}
+
+#[test]
+fn status() {
+    let active = serde_json::from_str(r#""active""#).unwrap();
+    assert_eq!(ConflictStatus::Active, active);
+    let pending = serde_json::from_str(r#""pending""#).unwrap();
+    assert_eq!(ConflictStatus::Pending, pending);
+    assert!(active > pending);
+    let none = serde_json::from_str(r#""""#).unwrap();
+    assert!(ConflictStatus::None != none);
+    assert!(none.is_null());
+    assert!(! (pending > ConflictStatus::None));
+    assert!(! (pending < ConflictStatus::None));
 }
 
 
