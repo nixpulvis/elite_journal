@@ -9,7 +9,7 @@ use crate::{
     Economy,
     Faction,
     FactionInfo,
-    Conflict,
+    FactionConflict,
 };
 
 #[derive(Deserialize, Debug)]
@@ -46,7 +46,7 @@ pub struct System {
     #[serde(default)]
     pub factions: Vec<FactionInfo>,
     #[serde(default)]
-    pub conflicts: Vec<Conflict>,
+    pub conflicts: Vec<FactionConflict>,
 
     // TODO: Should this even be an enum?
     pub powers: Option<Vec<String>>,

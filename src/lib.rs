@@ -62,10 +62,10 @@ mod faction;
 pub use self::faction::{
     Faction,
     FactionInfo,
+    FactionConflict,
+    FactionConflictProgress,
     State,
     StateTrend,
-    Conflict,
-    ConflictProgress,
 };
 
 mod station;

@@ -180,17 +180,17 @@ fn state_trend() {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
-pub struct Conflict {
+pub struct FactionConflict {
     pub war_type: String,
     // TODO: What about "", I've seen it but what does it mean?
     pub status: String,
-    pub faction_1: ConflictProgress,
-    pub faction_2: ConflictProgress,
+    pub faction_1: FactionConflictProgress,
+    pub faction_2: FactionConflictProgress,
 }
 
 #[test]
 fn conflict() {
-    assert!(serde_json::from_str::<Conflict>(r#"
+    assert!(serde_json::from_str::<FactionConflict>(r#"
         {
             "WarType": "civilwar",
             "Status": "active",
@@ -203,7 +203,7 @@ fn conflict() {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
-pub struct ConflictProgress {
+pub struct FactionConflictProgress {
     pub name: String,
     pub stake: String,
     pub won_days: u8,
@@ -211,7 +211,7 @@ pub struct ConflictProgress {
 
 #[test]
 fn conflict_progress() {
-    assert!(serde_json::from_str::<ConflictProgress>(r#"
+    assert!(serde_json::from_str::<FactionConflictProgress>(r#"
         { "Name": "Faction A", "Stake": "Installation X", "WonDays": 2 }
     "#).is_ok());
 }
