@@ -1,8 +1,10 @@
 //! # Elite: Dangerous Player Journal(s)
 //!
-//! As documented in detail the [readthedocs.io reference](https://elite-journal.readthedocs.io/en/latest),
-//! there are a number of files which the game itself updates and third-party tools sync through
-//! [EDDN](https://eddn.edcd.io) and other tools.
+//! As documented in detail in the [readthedocs.io reference][rtd], which is parsed from the
+//! official "Journal Manual", there are a number of files which the game itself updates and
+//! third-party tools consume. Most notable, [EDDN][eddn] syncs a subset of the game's journals
+//! from players running client tools like [Elite: Dangerous Discovery][edd] or [Elite: Dangerous
+//! Market Connector][edmc]. See our [`eddn` crate][eddn_crate] for more information.
 //!
 //! Every [`Entry`] in the Elite Dangerous journal and status files will have at least the
 //! following fields:
@@ -10,14 +12,24 @@
 //! - `timestamp`
 //! - `event`
 //!
-//! Matching on the `event` will determine the rest of the fields in the object. Files other than
-//! the main incremental journal logs each only contain a single event type, and are therefor not
-//! included in the broader [`entry::incremental::Event`] `enum`.
+//! The parser matchs on the `event` to determine the rest of the fields in the object. Status
+//! files other than the main incremental journals each only contain a single event type, and are
+//! therefor not included in the broader [`entry::Event`] `enum`.
+//!
+//! - Use [`parse_journal_file`] and [`parse_journal_dir`] for `*.log` journal files
+//! - Use [`parse_status_file`] for `*.json` status files
+//!
+//! [rtd]: https://elite-journal.readthedocs.io/en/latest
+//! [eddn]: https://eddn.edcd.io
+//! [eddn_crate]: https://github.com/ED-NEWP/eddn
+//! [edd]: https://github.com/EDDiscovery/EDDiscovery
+//! [edmc]: https://github.com/EDCD/EDMarketConnector
 //
 // https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
 #![allow(unused_braces)]
 
 use serde::Deserialize;
+use self::de::Nullable;
 
 /// All shared data models used throughout the events
 ///
@@ -35,22 +47,32 @@ use serde::Deserialize;
 /// ```
 pub mod prelude;
 
+/// Journal and status file entries
 pub mod entry;
-pub use self::entry::Entry;
+pub use self::entry::{
+    parse_status_file,
+    parse_journal_file,
+    parse_journal_dir,
+    Entry
+};
 
+/// A star system, located in static 3D space
 pub mod system;
+
+/// Galaxtic factions who occupy systems and participate in the game's background simulation
 pub mod faction;
+
+// TODO:
+// - Are all stations dockable?
+// - Do all stations have market ids? What about one's without the market service?
+// - What about all the other types in EDDB's station types dropdown?
 pub mod station;
 
 /// Serde helper deserializers
 pub mod de;
 
 
-pub trait Nullable {
-    fn is_null(&self) -> bool;
-}
-
-
+/// System and faction's organizational structure
 #[derive(Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
@@ -124,6 +146,7 @@ fn government() {
 }
 
 
+/// System and faction's alignment to the broader groups
 #[derive(Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]

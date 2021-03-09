@@ -1,19 +1,4 @@
-//! # Incremental Player Journal
-//!
-//! The `Journal.<datestamp>.<part>.log` files store a list of events in JSON lines format.
-//! The means that each line is a complete JSON object.
-//!
-//! Each incremental journal file will begin with a [`Fileheader`][incremental::Event::Fileheader]
-//! event which in addition to some other metadata, also contains the `part` of the log. This, in
-//! addition to the ubiquitous `timestamp` makes parsing the filename unnecessary. For more
-//! information on each [`Event`] read their individual documentation.
-use std::fs::{read_dir, File};
-use std::io::{BufRead, BufReader};
-use std::path::Path;
-use std::error::Error;
-use std::ffi::OsStr;
 use serde::Deserialize;
-use crate::Entry;
 
 // "AfmuRepairs"
 // "ApproachBody"
@@ -224,32 +209,6 @@ pub enum Event {
     Other,
 }
 
-// TODO: Our own error types.
-// TODO: add result inside vec too.
-// TODO: This should be an interator, since files are updates as the game runs.
-pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    Ok(reader.lines().map(|line| {
-        serde_json::from_str(&line.unwrap()).unwrap()
-    }).collect())
-}
-
-// TODO: Our own error types.
-// TODO: add result inside vec too.
-// TODO: is there a way to stream this too? search for current running log files?
-pub fn parse_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
-    let mut entries = Vec::new();
-    for entry in read_dir(path)? {
-        let entry = entry?;
-        if entry.file_type().unwrap().is_file() &&
-           entry.path().extension().and_then(OsStr::to_str) == Some("log")
-        {
-            entries.append(&mut parse_file(entry.path())?);
-        }
-    }
-    Ok(entries)
-}
 
 pub mod startup;
 pub mod travel;

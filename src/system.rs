@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use serde::Deserialize;
-use crate::{de, prelude::*, Nullable};
+use crate::{de::*, prelude::*};
 
 #[cfg(feature = "with-postgis-sqlx")]
 use std::io::Read;
@@ -23,23 +23,23 @@ pub struct System {
     #[serde(rename = "StarSystem")]
     pub name: String,
 
-    #[serde(deserialize_with = "de::zero_is_none")]
+    #[serde(deserialize_with = "zero_is_none")]
     pub population: Option<u64>,
     #[serde(rename = "SystemSecurity")]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub security: Option<Security>,
 
     #[serde(rename = "SystemGovernment")]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub government: Option<Government>,
     #[serde(rename = "SystemAllegiance")]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub allegiance: Option<Allegiance>,
     #[serde(rename = "SystemEconomy")]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub economy: Option<Economy>,
     #[serde(rename = "SystemSecondEconomy")]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub second_economy: Option<Economy>,
 
     #[serde(rename = "SystemFaction")]

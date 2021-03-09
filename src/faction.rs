@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use serde::Deserialize;
-use crate::{de, prelude::*, Nullable};
+use crate::{de::*, prelude::*};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -8,7 +8,7 @@ pub struct Faction {
     pub name: String,
     #[serde(rename = "FactionState")]
     #[serde(default)]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub state: Option<State>,
 }
 
@@ -32,12 +32,12 @@ fn faction() {
 pub struct FactionInfo {
     pub name: String,
     #[serde(rename = "FactionState")]
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub state: Option<State>,
     pub government: Government,
     pub influence: f32,
     pub allegiance: Allegiance,
-    #[serde(deserialize_with = "de::enum_is_null")]
+    #[serde(deserialize_with = "enum_is_null")]
     pub happiness: Option<Happiness>,
     #[serde(default)]
     pub pending_states: Vec<StateTrend>,
@@ -192,7 +192,7 @@ pub struct StateTrend {
     pub state: State,
     // TODO: When is this ever not 0?
     #[serde(default)]
-    #[serde(deserialize_with = "de::zero_is_none")]
+    #[serde(deserialize_with = "zero_is_none")]
     pub trend: Option<u64>,
 }
 

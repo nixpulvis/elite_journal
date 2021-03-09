@@ -1,5 +1,8 @@
 use serde::{Deserialize, Deserializer};
-use crate::Nullable;
+
+pub trait Nullable {
+    fn is_null(&self) -> bool;
+}
 
 // TODO: tests
 pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
@@ -17,6 +20,9 @@ pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
         Ok(None)
     }
 }
+
+///     #[serde(deserialize_with = "de::zero_is_none")]
+///     pub population: Option<u64>,
 
 // TODO: tests
 pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(deserializer: D)

@@ -1,7 +1,7 @@
-use elite_journal::entry::incremental::{parse_dir, Event};
+use elite_journal::entry::{parse_journal_dir, Event};
 
 fn main() {
-    let entries = parse_dir("dumps/").unwrap();
+    let entries = parse_journal_dir("dumps/").unwrap();
 
     // Print all FSDJumps to Sol.
     for entry in entries.iter() {

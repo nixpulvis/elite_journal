@@ -1,16 +1,12 @@
+use std::fs::{read_dir, File};
+use std::io::{BufRead, BufReader};
+use std::path::Path;
+use std::error::Error;
+use std::ffi::OsStr;
 use serde::Deserialize;
 use chrono::prelude::*;
 
-/// A single timestamped entry, containing an [`incremental::Event`], [`Route`], etc.
-///
-/// - Parse [`incremental::Event`]s from `Journal.<timestamp>.<part>.log` files with [`incremental::parse_file`]
-/// - TODO `Status.json`
-/// or [`incremental::parse_dir`].
-/// - Parse [`Route`]s from `NavRoute.json` files with [`route::parse_file`].
-/// - TODO `Market.json`
-/// - TODO `Shipyard.json`
-/// - TODO `Outfitting.json`
-/// - TODO `ModulesInfo.json`
+/// A single timestamped entry, containing an [`Event`], [`Route`], etc.
 #[derive(Deserialize, Debug, PartialEq)]
 pub struct Entry<E> {
     pub timestamp: DateTime<Utc>,
@@ -57,9 +53,57 @@ fn entry() {
 }
 
 
+/// Parse a single file's worth of journal entries
+// TODO: Our own error types.
+// TODO: add result inside vec too.
+// TODO: This should be an interator, since files are updates as the game runs.
+pub fn parse_journal_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+    Ok(reader.lines().map(|line| {
+        serde_json::from_str(&line.unwrap()).unwrap()
+    }).collect())
+}
+
+/// Parse all journals file's entries in a directory
+// TODO: Our own error types.
+// TODO: add result inside vec too.
+// TODO: is there a way to stream this too? search for current running log files?
+pub fn parse_journal_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
+    let mut entries = Vec::new();
+    for entry in read_dir(path)? {
+        let entry = entry?;
+        if entry.file_type().unwrap().is_file() &&
+           entry.path().extension().and_then(OsStr::to_str) == Some("log")
+        {
+            entries.append(&mut parse_journal_file(entry.path())?);
+        }
+    }
+    Ok(entries)
+}
+
+
+/// Parse a status file entry
+// TODO: Our own error types.
+pub fn parse_status_file<P: AsRef<Path>, E>(path: P) -> Result<Entry<E>, serde_json::Error>
+    where for<'de> E: Deserialize<'de>
+{
+    let file = File::open(path).unwrap();
+    let reader = BufReader::new(file);
+    serde_json::from_reader(reader)
+}
+
+
 /// `Journal.<timestamp>.<part>.log`
+///
+/// These files store a list of events in JSON lines format. The means that each line is a complete
+/// JSON object.
+///
+/// Each incremental journal file will begin with a [`Fileheader`][incremental::Event::Fileheader]
+/// event which in addition to some other metadata, also contains the `part` of the log. This, in
+/// addition to the ubiquitous `timestamp` makes parsing the filename unnecessary. For more
+/// information on each [`Event`] read their individual documentation.
 pub mod incremental;
-// TODO: It's time to just merge these all.
 pub use self::incremental::Event;
 
 /// `Status.json` TODO
