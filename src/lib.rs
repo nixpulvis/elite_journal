@@ -72,7 +72,7 @@ pub use self::faction::{
 };
 
 mod station;
-pub use self::station::{Station, EconomyShare};
+pub use self::station::{Station, StationType, Services, EconomyShare};
 
 /// Serde helper deserializers
 pub mod de;
