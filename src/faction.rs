@@ -162,30 +162,75 @@ fn state() {
 }
 
 
+#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+pub enum Status {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "pending")]
+    Pending,
+    #[serde(rename = "")]
+    Recovering,
+}
+
+impl PartialOrd for Status {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        (*other as u8).partial_cmp(&(*self as u8))
+    }
+}
+
+#[test]
+fn status() {
+    let active = serde_json::from_str(r#""active""#).unwrap();
+    assert_eq!(Status::Active, active);
+    let pending = serde_json::from_str(r#""pending""#).unwrap();
+    assert_eq!(Status::Pending, pending);
+    let recovering = serde_json::from_str(r#""""#).unwrap();
+    assert_eq!(Status::Recovering, recovering);
+    assert!(active > pending && pending > recovering);
+}
+
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct StateTrend {
     pub state: State,
     // TODO: When is this ever not 0?
-    pub trend: Option<u8>,
+    #[serde(default)]
+    #[serde(deserialize_with = "de::zero_is_none")]
+    pub trend: Option<u64>,
 }
 
 #[test]
 fn state_trend() {
     assert!(serde_json::from_str::<StateTrend>(r#"
-        { "State": "Expansion", "Trend": 0 }
+        { "State": "Expansion" }
     "#).is_ok());
+    assert!(serde_json::from_str::<StateTrend>(r#"
+        { "State": "Expansion", "Trend": null }
+    "#).is_ok());
+    assert_eq!(serde_json::from_str::<StateTrend>(r#"
+        { "State": "Expansion", "Trend": 0 }
+    "#).unwrap().trend, None);
+    assert_eq!(serde_json::from_str::<StateTrend>(r#"
+        { "State": "Expansion", "Trend": 1 }
+    "#).unwrap().trend, Some(1));
 }
 
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionConflict {
+    /// A conflict's type determines what triggers it and the way it is resolved.
     pub war_type: ConflictType,
-    // TODO: What about "", I've seen it but what does it mean?
-    #[serde(deserialize_with = "de::enum_is_null")]
-    pub status: Option<ConflictStatus>,
+    /// Conflicts (like any other state) have a countdown and cooldown period before and after they
+    /// are active.
+    ///
+    // TODO: Does this match the faction's states vector?
+    pub status: Option<Status>,
+    /// The defending faction, which had the higher influence before the conflict.
     pub faction_1: FactionConflictProgress,
+    /// The attacking faction, which had the lower influence before the conflict.
     pub faction_2: FactionConflictProgress,
 }
 
@@ -222,58 +267,6 @@ fn conflict_type() {
     assert_eq!(ConflictType::War, war);
     assert_eq!(ConflictType::CivilWar, civil_war);
     assert_eq!(ConflictType::Election, election);
-}
-
-
-#[derive(Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
-#[cfg_attr(feature = "with-sqlx", sqlx(type_name = "Status"))]
-pub enum ConflictStatus {
-    #[serde(rename = "active")]
-    Active,
-    #[serde(rename = "pending")]
-    Pending,
-    #[serde(rename = "")]
-    None,
-}
-
-impl Nullable for ConflictStatus {
-    fn is_null(&self) -> bool {
-        match self {
-            ConflictStatus::None => true,
-            _ => false,
-        }
-    }
-}
-
-impl PartialEq for ConflictStatus {
-    fn eq(&self, other: &Self) -> bool {
-        match (*other, *self) {
-            (ConflictStatus::None, ConflictStatus::None) => false,
-            (l, r) => l as u8 == r as u8,
-        }
-    }
-}
-
-impl PartialOrd for ConflictStatus {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.is_null() || other.is_null() { return None }
-        (*other as u8).partial_cmp(&(*self as u8))
-    }
-}
-
-#[test]
-fn status() {
-    let active = serde_json::from_str(r#""active""#).unwrap();
-    assert_eq!(ConflictStatus::Active, active);
-    let pending = serde_json::from_str(r#""pending""#).unwrap();
-    assert_eq!(ConflictStatus::Pending, pending);
-    assert!(active > pending);
-    let none = serde_json::from_str(r#""""#).unwrap();
-    assert!(ConflictStatus::None != none);
-    assert!(none.is_null());
-    assert!(! (pending > ConflictStatus::None));
-    assert!(! (pending < ConflictStatus::None));
 }
 
 

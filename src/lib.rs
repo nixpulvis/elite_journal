@@ -65,9 +65,9 @@ pub use self::faction::{
     FactionConflict,
     FactionConflictProgress,
     ConflictType,
-    ConflictStatus,
     State,
     StateTrend,
+    Status,
     Happiness,
 };
 

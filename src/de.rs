@@ -23,10 +23,11 @@ pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(deserializer: D)
     -> Result<Option<T>, D::Error>
     where D: Deserializer<'d>,
 {
-    let number = T::deserialize(deserializer)?;
-    if number == 0 {
-        Ok(None)
-    } else {
-        Ok(Some(number))
+    let number = Option::<T>::deserialize(deserializer)?;
+    if let Some(n) = number {
+        if n != 0 {
+            return Ok(Some(n));
+        }
     }
+    Ok(None)
 }
