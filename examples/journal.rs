@@ -1,4 +1,4 @@
-use elite_journal::incremental::{parse_dir, Event};
+use elite_journal::entry::incremental::{parse_dir, Event};
 
 fn main() {
     let entries = parse_dir("dumps/").unwrap();

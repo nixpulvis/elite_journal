@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use serde::Deserialize;
-use crate::{Entry, Coordinate};
+use crate::{prelude::*, Entry};
 
 // Single variant enum to satify serde for the shape of the data inside an [`Entry`].
 #[derive(Deserialize, Debug, PartialEq)]

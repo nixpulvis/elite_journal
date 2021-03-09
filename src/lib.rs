@@ -12,123 +12,38 @@
 //!
 //! Matching on the `event` will determine the rest of the fields in the object. Files other than
 //! the main incremental journal logs each only contain a single event type, and are therefor not
-//! included in the broader [`Event`] `enum`.
-//!
-//! # Incremental Player Journal
-//!
-//! The `Journal.<datestamp>.<part>.log` files store a list of events in JSON lines format.
-//! The means that each line is a complete JSON object.
-//!
-//! Each incremental journal file will begin with a [`Fileheader`][incremental::Event::Fileheader]
-//! event which in addition to some other metadata, also contains the `part` of the log. This, in
-//! addition to the ubiquitous `timestamp` makes parsing the filename unnecessary. For more
-//! information on each [`Event`] read their individual documentation.
-//!
-//! # Status File(s)
-//!
-//! - `Status.json` TODO
-//! - `Cargo.json` TODO
-//! - `NavRoute.json`
-//!
-//! # Service and Market Files
-//!
-//! - `Market.json` TODO
-//! - `Shipyard.json` TODO
-//! - `Outfitting.json` TODO
-//! - `ModulesInfo.json` TODO
-//!
-
+//! included in the broader [`entry::incremental::Event`] `enum`.
+//
 // https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
 #![allow(unused_braces)]
 
 use serde::Deserialize;
-use chrono::prelude::*;
 
-/// `Journal.<timestamp>.<part>.log`
-pub mod incremental;
-pub use self::incremental::Event;
+/// All shared data models used throughout the events
+///
+/// To use this module effectivly add the following `use` statement to your files:
+///
+/// ```
+/// use elite_journal::prelude::*;
+/// ```
+///
+/// Often you'll also want to import the [`Entry`] and various [`entry`] types as well, for
+/// example:
+///
+/// ```
+/// use elite_journal::{prelude::*, entry::{Entry, Event}};
+/// ```
+pub mod prelude;
 
-/// `NavRoute.json`
-pub mod route;
-pub use self::route::Route;
+pub mod entry;
+pub use self::entry::Entry;
 
-mod coordinate;
-pub use self::coordinate::Coordinate;
-
-mod system;
-pub use self::system::{System, Security, PowerplayState};
-
-mod faction;
-pub use self::faction::{
-    Faction,
-    FactionInfo,
-    FactionConflict,
-    FactionConflictProgress,
-    ConflictType,
-    State,
-    StateTrend,
-    Status,
-    Happiness,
-};
-
-mod station;
-pub use self::station::{Station, StationType, Services, EconomyShare};
+pub mod system;
+pub mod faction;
+pub mod station;
 
 /// Serde helper deserializers
 pub mod de;
-
-/// A single timestamped entry, containing an [`Event`], [`Route`], etc.
-///
-/// - Parse [`Event`]s from `Journal.<timestamp>.<part>.log` files with [`incremental::parse_file`]
-/// - TODO `Status.json`
-/// or [`incremental::parse_dir`].
-/// - Parse [`Route`]s from `NavRoute.json` files with [`route::parse_file`].
-/// - TODO `Market.json`
-/// - TODO `Shipyard.json`
-/// - TODO `Outfitting.json`
-/// - TODO `ModulesInfo.json`
-#[derive(Deserialize, Debug, PartialEq)]
-pub struct Entry<E> {
-    pub timestamp: DateTime<Utc>,
-    #[serde(flatten)]
-    pub event: E,
-}
-
-#[test]
-fn entry() {
-    #[derive(Deserialize)]
-    enum Dumb { Foo }
-    assert!(serde_json::from_str::<Entry<Dumb>>(r#"
-        {
-            "timestamp": "1970-01-01T00:00:00Z",
-            "Foo": null
-        }
-    "#).is_ok());
-    #[derive(Deserialize)]
-    #[serde(rename_all = "PascalCase")]
-    #[allow(unused)]
-    struct Dumber {
-        key: (),
-    }
-    assert!(serde_json::from_str::<Entry<Dumber>>(r#"
-        {
-            "timestamp": "1970-01-01T00:00:00Z",
-            "Key": null
-        }
-    "#).is_ok());
-    #[derive(Deserialize)]
-    #[serde(rename_all = "PascalCase")]
-    #[allow(unused)]
-    struct Dumbest {
-        key: Government,
-    }
-    assert!(serde_json::from_str::<Entry<Dumbest>>(r#"
-        {
-            "timestamp": "1970-01-01T00:00:00Z",
-            "Key": "Anarchy"
-        }
-    "#).is_ok());
-}
 
 
 pub trait Nullable {
@@ -257,75 +172,4 @@ fn allegiance() {
     assert!(Allegiance::None != Allegiance::None);
     assert!(serde_json::from_str::<Allegiance>(r#""None""#).unwrap().is_null());
     assert!(serde_json::from_str::<Allegiance>(r#""""#).unwrap().is_null());
-}
-
-
-#[derive(Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
-#[serde(rename_all = "PascalCase")]
-pub enum Economy {
-    #[serde(alias = "$economy_Agri;")]
-    Agriculture,
-    #[serde(alias = "$economy_Colony;")]
-    Colony,
-    #[serde(alias = "$economy_Extraction;")]
-    Extraction,
-    #[serde(alias = "$economy_HighTech;")]
-    #[serde(alias = "High Tech")]
-    HighTech,
-    #[serde(alias = "$economy_Industrial;")]
-    Industrial,
-    #[serde(alias = "$economy_Military;")]
-    Military,
-    #[serde(alias = "$economy_Refinery;")]
-    Refinery,
-    #[serde(alias = "$economy_Service;")]
-    Service,
-    #[serde(alias = "$economy_Terraforming;")]
-    Terraforming,
-    #[serde(alias = "$economy_Tourism;")]
-    Tourism,
-    #[serde(alias = "$economy_Carrier;")]
-    Carrier,
-    #[serde(alias = "$economy_Prison;")]
-    Prison,
-    #[serde(alias = "$economy_Undefined;")]
-    Undefined,
-    #[serde(alias = "")]
-    #[serde(alias = "$economy_None;")]
-    None,
-}
-
-impl Nullable for Economy {
-    fn is_null(&self) -> bool {
-        match self {
-            Economy::None => true,
-            _ => false,
-        }
-    }
-}
-
-impl PartialEq for Economy {
-    fn eq(&self, other: &Self) -> bool {
-        match (*other, *self) {
-            (Economy::None, Economy::None) => false,
-            (l, r) => l as u8 == r as u8,
-        }
-    }
-}
-
-#[test]
-fn economy() {
-    let high_tech = serde_json::from_str(r#"
-        "High Tech"
-    "#).unwrap();
-    assert_eq!(Economy::HighTech, high_tech);
-    let extraction = serde_json::from_str(r#"
-        "$economy_Extraction;"
-    "#).unwrap();
-    assert_eq!(Economy::Extraction, extraction);
-    assert!(Economy::None != Economy::None);
-    assert!(serde_json::from_str::<Economy>(r#""$economy_None;""#).unwrap().is_null());
-    assert!(serde_json::from_str::<Economy>(r#""None""#).unwrap().is_null());
-    assert!(serde_json::from_str::<Economy>(r#""""#).unwrap().is_null());
 }

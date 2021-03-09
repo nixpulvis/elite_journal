@@ -1,11 +1,6 @@
 use std::cmp::Ordering;
 use serde::Deserialize;
-use crate::{
-    de,
-    Nullable,
-    Government,
-    Allegiance,
-};
+use crate::{de, prelude::*, Nullable};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -222,7 +217,8 @@ fn state_trend() {
 #[serde(rename_all = "PascalCase")]
 pub struct FactionConflict {
     /// A conflict's type determines what triggers it and the way it is resolved.
-    pub war_type: ConflictType,
+    #[serde(rename = "WarType")]
+    pub ty: FactionConflictType,
     /// Conflicts (like any other state) have a countdown and cooldown period before and after they
     /// are active.
     ///
@@ -250,7 +246,7 @@ fn conflict() {
 #[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[cfg_attr(feature = "with-sqlx", sqlx(type_name = "Conflict"))]
-pub enum ConflictType {
+pub enum FactionConflictType {
     #[serde(rename = "war")]
     War,
     #[serde(rename = "civilwar")]
@@ -264,9 +260,9 @@ fn conflict_type() {
     let war = serde_json::from_str(r#""war""#).unwrap();
     let civil_war = serde_json::from_str(r#""civilwar""#).unwrap();
     let election = serde_json::from_str(r#""election""#).unwrap();
-    assert_eq!(ConflictType::War, war);
-    assert_eq!(ConflictType::CivilWar, civil_war);
-    assert_eq!(ConflictType::Election, election);
+    assert_eq!(FactionConflictType::War, war);
+    assert_eq!(FactionConflictType::CivilWar, civil_war);
+    assert_eq!(FactionConflictType::Election, election);
 }
 
 

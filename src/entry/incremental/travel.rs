@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::{System, Station};
+use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]

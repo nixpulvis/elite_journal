@@ -1,10 +1,5 @@
 use serde::Deserialize;
-use crate::{
-    Government,
-    Allegiance,
-    Economy,
-    Faction,
-};
+use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
 pub struct Station {

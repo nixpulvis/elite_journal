@@ -1,16 +1,17 @@
 use std::cmp::Ordering;
 use serde::Deserialize;
-use crate::{
-    de,
-    Nullable,
-    Coordinate,
-    Government,
-    Allegiance,
-    Economy,
-    Faction,
-    FactionInfo,
-    FactionConflict,
+use crate::{de, prelude::*, Nullable};
+
+#[cfg(feature = "with-postgis-sqlx")]
+use std::io::Read;
+#[cfg(feature = "with-postgis-sqlx")]
+use geozero::{
+    wkb::{FromWkb, WkbDialect},
+    CoordDimensions,
+    GeomProcessor,
+    GeozeroGeometry
 };
+
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -162,4 +163,124 @@ pub enum PowerplayState {
     Controlled,
     Turmoil,
     HomeSystem,
+}
+
+
+#[derive(Deserialize, Debug, Copy, Clone)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[serde(rename_all = "PascalCase")]
+pub enum Economy {
+    #[serde(alias = "$economy_Agri;")]
+    Agriculture,
+    #[serde(alias = "$economy_Colony;")]
+    Colony,
+    #[serde(alias = "$economy_Extraction;")]
+    Extraction,
+    #[serde(alias = "$economy_HighTech;")]
+    #[serde(alias = "High Tech")]
+    HighTech,
+    #[serde(alias = "$economy_Industrial;")]
+    Industrial,
+    #[serde(alias = "$economy_Military;")]
+    Military,
+    #[serde(alias = "$economy_Refinery;")]
+    Refinery,
+    #[serde(alias = "$economy_Service;")]
+    Service,
+    #[serde(alias = "$economy_Terraforming;")]
+    Terraforming,
+    #[serde(alias = "$economy_Tourism;")]
+    Tourism,
+    #[serde(alias = "$economy_Carrier;")]
+    Carrier,
+    #[serde(alias = "$economy_Prison;")]
+    Prison,
+    #[serde(alias = "$economy_Undefined;")]
+    Undefined,
+    #[serde(alias = "")]
+    #[serde(alias = "$economy_None;")]
+    None,
+}
+
+impl Nullable for Economy {
+    fn is_null(&self) -> bool {
+        match self {
+            Economy::None => true,
+            _ => false,
+        }
+    }
+}
+
+impl PartialEq for Economy {
+    fn eq(&self, other: &Self) -> bool {
+        match (*other, *self) {
+            (Economy::None, Economy::None) => false,
+            (l, r) => l as u8 == r as u8,
+        }
+    }
+}
+
+#[test]
+fn economy() {
+    let high_tech = serde_json::from_str(r#"
+        "High Tech"
+    "#).unwrap();
+    assert_eq!(Economy::HighTech, high_tech);
+    let extraction = serde_json::from_str(r#"
+        "$economy_Extraction;"
+    "#).unwrap();
+    assert_eq!(Economy::Extraction, extraction);
+    assert!(Economy::None != Economy::None);
+    assert!(serde_json::from_str::<Economy>(r#""$economy_None;""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Economy>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Economy>(r#""""#).unwrap().is_null());
+}
+
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub struct Coordinate {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+}
+
+#[cfg(feature = "with-postgis-sqlx")]
+impl GeomProcessor for Coordinate {
+    fn dimensions(&self) -> CoordDimensions {
+        CoordDimensions::xyz()
+    }
+
+    fn coordinate(&mut self, x: f64, y: f64, z: Option<f64>,
+        _m: Option<f64>, _t: Option<f64>, _tm: Option<u64>, _idx: usize,)
+        -> geozero::error::Result<()>
+    {
+        self.x = x;
+        self.y = y;
+        self.z = z.unwrap_or(0.0);
+        Ok(())
+    }
+}
+
+#[cfg(feature = "with-postgis-sqlx")]
+impl GeozeroGeometry for Coordinate {
+    fn process_geom<P: GeomProcessor>(&self, processor: &mut P)
+        -> std::result::Result<(), geozero::error::GeozeroError>
+    {
+        processor.point_begin(0)?;
+        processor.coordinate(self.x, self.y, Some(self.z), None, None, None, 0)?;
+        processor.point_end(0)
+    }
+
+    fn dims(&self) -> CoordDimensions {
+        CoordDimensions::xyz()
+    }
+}
+
+#[cfg(feature = "with-postgis-sqlx")]
+impl FromWkb for Coordinate {
+    fn from_wkb<R: Read>(rdr: &mut R, dialect: WkbDialect) -> geozero::error::Result<Self> {
+        let mut pt = Coordinate { x: 0., y: 0., z: 0. };
+        geozero::wkb::process_wkb_type_geom(rdr, &mut pt, dialect)?;
+        Ok(pt)
+    }
 }
