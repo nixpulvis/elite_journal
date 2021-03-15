@@ -237,7 +237,7 @@ fn economy() {
 }
 
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct Coordinate {
     pub x: f64,
     pub y: f64,
