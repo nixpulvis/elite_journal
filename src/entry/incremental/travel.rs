@@ -12,16 +12,44 @@ pub struct FsdTarget {
     remaining: Option<u16>,
 }
 
+/// These are just the game's names, they don't really make sense since tritium is an isotope
+/// of hydrogen.
+#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+pub enum Fuel {
+    /// When we enter for fleet carriers, not the event
+    Tritium,
+    /// Ship fuel from the [`elite_journal::entry::incremental::travel::FsdJump`]
+    Hydrogen,
+}
+
+impl Default for Fuel {
+    fn default() -> Self {
+        Fuel::Hydrogen
+    }
+}
+
+#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+pub struct Cost {
+    #[serde(skip)]
+    pub ty: Fuel,
+    // EDDN optional only?
+    #[serde(rename = "JumpDist")]
+    pub distance: f32,
+    // EDDN optional only?
+    #[serde(rename = "FuelUsed")]
+    pub used: f32,
+    #[serde(rename = "FuelLevel")]
+    pub level: f32,
+}
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FsdJump {
     #[serde(flatten)]
     pub system: System,
-    // EDDN optional only?
-    pub jump_dist: Option<f64>,
-    // EDDN optional only?
-    pub fuel_used: Option<f64>,
-    pub fuel_level: Option<f64>,
+    #[serde(flatten)]
+    pub cost: Option<Cost>,
 }
 
 #[derive(Deserialize, Debug)]
