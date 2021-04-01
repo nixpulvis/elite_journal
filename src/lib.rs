@@ -99,6 +99,7 @@ pub enum Government {
     Prison,
     #[serde(alias = "$government_PrisonColony;")]
     #[serde(alias = "Prison Colony")]
+    #[serde(alias = "Prison colony")]
     PrisonColony,
     #[serde(alias = "$government_Theocracy;")]
     Theocracy,

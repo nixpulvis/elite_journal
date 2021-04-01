@@ -87,12 +87,16 @@ pub enum State {
     Boom,
     Bust,
     #[serde(alias = "Civil Liberty")]
+    #[serde(alias = "Civil liberty")]
     CivilLiberty,
     #[serde(alias = "Civil Unrest")]
+    #[serde(alias = "Civil unrest")]
     CivilUnrest,
     #[serde(alias = "Civil War")]
+    #[serde(alias = "Civil war")]
     CivilWar,
     #[serde(alias = "Cold War")]
+    #[serde(alias = "Cold war")]
     ColdWar,
     Colonisation,
     Drought,
@@ -100,25 +104,33 @@ pub enum State {
     Expansion,
     Famine,
     #[serde(alias = "Historic Event")]
+    #[serde(alias = "Historic event")]
     HistoricEvent,
     #[serde(alias = "Infrastructure Failure")]
+    #[serde(alias = "Infrastructure failure")]
     InfrastructureFailure,
     Investment,
     Lockdown,
     #[serde(alias = "Natural Disaster")]
+    #[serde(alias = "Natural disaster")]
     NaturalDisaster,
     Outbreak,
     #[serde(alias = "Pirate Attack")]
+    #[serde(alias = "Pirate attack")]
     PirateAttack,
     #[serde(alias = "Public Holiday")]
+    #[serde(alias = "Public holiday")]
     PublicHoliday,
     Retreat,
     Revolution,
     #[serde(alias = "Technological Leap")]
+    #[serde(alias = "Technological leap")]
     TechnologicalLeap,
     #[serde(alias = "Terrorist Attack")]
+    #[serde(alias = "Terrorist attack")]
     Terrorism,
     #[serde(alias = "Trade War")]
+    #[serde(alias = "Trade war")]
     TradeWar,
     War,
     #[serde(alias = "")]
