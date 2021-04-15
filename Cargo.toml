@@ -1,7 +1,9 @@
 [package]
 name = "elite_journal"
+description = "Elite: Dangerous journal file stuctures and parsers"
 version = "0.0.1-dev+alpha"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
+license = "Beerware"
 edition = "2018"
 
 [features]
@@ -9,8 +11,8 @@ with-sqlx = ["sqlx/runtime-async-std-native-tls"]
 with-postgis-sqlx = ["with-sqlx", "geozero/with-wkb", "geozero/with-postgis-sqlx"]
 
 [dependencies]
-serde      = { version = "*", features = ["derive"] }
-serde_json = "*"
-chrono     = { version = "*", features = ["serde"] }
-sqlx       = { version = "*", optional = true }
+serde      = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono     = { version = "0.4", features = ["serde"] }
+sqlx       = { version = "0.5", optional = true }
 geozero    = { git = "https://github.com/georust/geozero", branch = "master" }
