@@ -27,7 +27,7 @@ pub struct Station {
 
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum StationType {
     AsteroidBase,
     Coriolis,
@@ -42,7 +42,7 @@ pub enum StationType {
 
 
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum Services {
     #[serde(rename = "autodock")]
     Autodock,

@@ -15,7 +15,7 @@ pub struct FsdTarget {
 /// These are just the game's names, they don't really make sense since tritium is an isotope
 /// of hydrogen.
 #[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum Fuel {
     /// When we enter for fleet carriers, not the event
     Tritium,

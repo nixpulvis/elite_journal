@@ -2,9 +2,9 @@ use std::cmp::Ordering;
 use serde::Deserialize;
 use crate::{de::*, prelude::*};
 
-#[cfg(feature = "with-postgis-sqlx")]
+#[cfg(all(unix, feature = "with-postgis-sqlx"))]
 use std::io::Read;
-#[cfg(feature = "with-postgis-sqlx")]
+#[cfg(all(unix, feature = "with-postgis-sqlx"))]
 use geozero::{
     wkb::{FromWkb, WkbDialect},
     CoordDimensions,
@@ -80,7 +80,7 @@ fn system() {
 
 
 #[derive(Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Security {
     #[serde(alias = "$SYSTEM_SECURITY_high;")]
@@ -154,7 +154,7 @@ fn security() {
 
 // TODO: test
 #[derive(Deserialize, Debug)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,
     Prepared,
@@ -167,7 +167,7 @@ pub enum PowerplayState {
 
 
 #[derive(Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Economy {
     #[serde(alias = "$economy_Agri;")]
@@ -244,7 +244,7 @@ pub struct Coordinate {
     pub z: f64,
 }
 
-#[cfg(feature = "with-postgis-sqlx")]
+#[cfg(all(unix, feature = "with-postgis-sqlx"))]
 impl GeomProcessor for Coordinate {
     fn dimensions(&self) -> CoordDimensions {
         CoordDimensions::xyz()
@@ -261,7 +261,7 @@ impl GeomProcessor for Coordinate {
     }
 }
 
-#[cfg(feature = "with-postgis-sqlx")]
+#[cfg(all(unix, feature = "with-postgis-sqlx"))]
 impl GeozeroGeometry for Coordinate {
     fn process_geom<P: GeomProcessor>(&self, processor: &mut P)
         -> std::result::Result<(), geozero::error::GeozeroError>
@@ -276,7 +276,8 @@ impl GeozeroGeometry for Coordinate {
     }
 }
 
-#[cfg(feature = "with-postgis-sqlx")]
+#[cfg(unix)]
+#[cfg(all(unix, feature = "with-postgis-sqlx"))]
 impl FromWkb for Coordinate {
     fn from_wkb<R: Read>(rdr: &mut R, dialect: WkbDialect) -> geozero::error::Result<Self> {
         let mut pt = Coordinate { x: 0., y: 0., z: 0. };

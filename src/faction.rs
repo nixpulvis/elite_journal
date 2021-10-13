@@ -80,7 +80,7 @@ fn faction_info() {
 
 
 #[derive(Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum State {
     Blight,
@@ -170,7 +170,7 @@ fn state() {
 
 
 #[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum Status {
     #[serde(rename = "active")]
     Active,
@@ -256,8 +256,8 @@ fn conflict() {
 
 
 #[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
-#[cfg_attr(feature = "with-sqlx", sqlx(type_name = "Conflict"))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), sqlx(type_name = "Conflict"))]
 pub enum FactionConflictType {
     #[serde(rename = "war")]
     War,
@@ -295,7 +295,7 @@ fn conflict_progress() {
 
 
 #[derive(Deserialize, Debug, Copy, Clone)]
-#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Happiness {
     #[serde(rename = "$Faction_HappinessBand1;")]
