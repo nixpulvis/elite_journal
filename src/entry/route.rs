@@ -2,8 +2,8 @@ use serde::Deserialize;
 use crate::prelude::*;
 
 // Single variant enum to satify serde for the shape of the data inside an [`Entry`].
-#[derive(Deserialize, Debug, PartialEq)]
-pub enum Route {
+#[derive(Deserialize, Debug)]
+pub enum NavRoute {
     Route(Vec<Destination>)
 }
 

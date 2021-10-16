@@ -40,6 +40,23 @@ pub enum StationType {
     Outpost,
 }
 
+#[derive(Deserialize, Debug)]
+pub enum PadSize {
+    Small,
+    Medium,
+    Large,
+}
+
+#[derive(Deserialize, Debug)]
+pub enum DockingDeniedReason {
+    NoSpace,
+    TooLarge,
+    Hostile,
+    Offences,
+    Distance,
+    ActiveFighter,
+    NoReason,
+}
 
 #[derive(Deserialize, Debug)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]

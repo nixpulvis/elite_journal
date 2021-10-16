@@ -21,6 +21,11 @@ pub use crate::faction::{
 pub use crate::station::{
     Station,
     StationType,
+    PadSize,
+    DockingDeniedReason,
     Services,
     EconomyShare,
+};
+pub use crate::ship::{
+    JumpCost,
 };

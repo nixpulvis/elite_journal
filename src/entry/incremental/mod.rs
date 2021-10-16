@@ -1,7 +1,7 @@
 use serde::Deserialize;
+use crate::entry::route::NavRoute;
 
 // "AfmuRepairs"
-// "ApproachBody"
 // "ApproachSettlement"
 // "Bounty"
 // "BuyAmmo"
@@ -43,12 +43,7 @@ use serde::Deserialize;
 // "DataScanned"
 // "Died"
 // "DiscoveryScan"
-// "Docked"
 // "DockFighter"
-// "DockingCancelled"
-// "DockingDenied"
-// "DockingGranted"
-// "DockingRequested"
 // "DockSRV"
 // "EjectCargo"
 // "EndCrewSession"
@@ -190,14 +185,27 @@ pub enum Event {
     LoadGame(startup::LoadGame),
     Materials(startup::Materials),
 
+    Location(travel::Location),
+
     Docked(travel::Docked),
+
+    DockingGranted(travel::DockingGranted),
+    DockingRequested(travel::DockingRequested),
+    DockingDenied(travel::DockingDenied),
+    DockingCancelled(travel::DockingCancelled),
+    DockingTimeout(travel::DockingTimeout),
+
+    Liftoff(travel::Liftoff),
+    LeaveBody(travel::LeaveBody),
+    ApproachBody(travel::ApproachBody),
+
     #[serde(rename = "FSDTarget")]
     FsdTarget(travel::FsdTarget),
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
-    Location(travel::Location),
+
     /// Signals an update to the [`NavRoute.json`][crate::entry::route] file
-    NavRoute,
+    NavRoute(NavRoute),
 
     BuyExplorationData(exploration::BuyExplorationData),
     SellExplorationData(exploration::SellExplorationData),

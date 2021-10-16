@@ -6,7 +6,7 @@ use std::ffi::OsStr;
 use serde::Deserialize;
 use chrono::prelude::*;
 
-/// A single timestamped entry, containing an [`Event`], [`Route`], etc.
+/// A single timestamped entry, containing an [`Event`], [`NavRoute`], etc.
 #[derive(Deserialize, Debug, PartialEq)]
 pub struct Entry<E> {
     pub timestamp: DateTime<Utc>,
@@ -111,7 +111,7 @@ pub mod status {}
 
 /// `NavRoute.json`
 pub mod route;
-pub use self::route::Route;
+pub use self::route::NavRoute;
 
 /// `Cargo.json` TODO
 pub mod cargo {}

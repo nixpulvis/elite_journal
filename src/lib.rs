@@ -68,6 +68,9 @@ pub mod faction;
 // - What about all the other types in EDDB's station types dropdown?
 pub mod station;
 
+// TODO
+pub mod ship;
+
 /// Serde helper deserializers
 pub mod de;
 
