@@ -21,7 +21,7 @@
 //!
 //! [rtd]: https://elite-journal.readthedocs.io/en/latest
 //! [eddn]: https://eddn.edcd.io
-//! [eddn_crate]: https://github.com/ED-NEWP/eddn
+//! [eddn_crate]: https://github.com/nixpulvis/eddn
 //! [edd]: https://github.com/EDDiscovery/EDDiscovery
 //! [edmc]: https://github.com/EDCD/EDMarketConnector
 //
