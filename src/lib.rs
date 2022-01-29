@@ -59,6 +59,9 @@ pub use self::entry::{
 /// A star system, located in static 3D space
 pub mod system;
 
+/// A star system's orbital bodies, located in dynamic 3D space
+pub mod body;
+
 /// Galaxtic factions who occupy systems and participate in the game's background simulation
 pub mod faction;
 

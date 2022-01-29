@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -27,4 +28,35 @@ pub struct SellExplorationData {
     pub total_earnings: u64,
 }
 
-// TODO: Scan next
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Material {
+    name: String,
+    percent: f64,
+}
+
+pub enum ScanType {
+    Basic,
+    Detailed,
+    NavBeacon,
+    NavBeaconDetail,
+    AutoScan
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Scan {
+    pub scan_type: String,
+    #[serde(flatten)]
+    pub body: Body,
+    pub materials: Option<Vec<Material>>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct SAASignalsFound {
+    /// The target body for the surface scan
+    pub body: Body,
+    /// Detected nearby signals
+    pub signals: Vec<Signal>
+}

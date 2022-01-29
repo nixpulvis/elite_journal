@@ -15,7 +15,6 @@ use crate::entry::route::NavRoute;
 // "CarrierDepositFuel"
 // "CarrierDockingPermission"
 // "CarrierFinance"
-// "CarrierJump"
 // "CarrierJumpCancelled"
 // "CarrierJumpRequest"
 // "CarrierModulePack"
@@ -134,7 +133,6 @@ use crate::entry::route::NavRoute;
 // "RestockVehicle"
 // "Resurrect"
 // "SAAScanComplete"
-// "SAASignalsFound"
 // "Scan"
 // "Scanned"
 // "ScientificResearch"
@@ -203,12 +201,16 @@ pub enum Event {
     FsdTarget(travel::FsdTarget),
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
+    // TODO: next
+    // CarrierJump(travel::CarrierJump),
 
     /// Signals an update to the [`NavRoute.json`][crate::entry::route] file
     NavRoute(NavRoute),
 
     BuyExplorationData(exploration::BuyExplorationData),
     SellExplorationData(exploration::SellExplorationData),
+    SAASignalsFound(exploration::SAASignalsFound),
+    Scan(exploration::Scan),
 
     // TODO: We'll leave this in for sure... but we should test without it, and probably find a way
     // to add a generic JSON value to this.

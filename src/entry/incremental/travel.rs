@@ -159,8 +159,8 @@ pub struct Touchdown {
     pub system_address: u64,
     #[serde(rename = "StarSystem")]
     pub system_name: String,
-    #[serde(rename = "Body")]
     pub body_name: String,
+    #[serde(rename = "BodyID")]
     pub body_id: u64,
     pub latitude: f64,
     pub longitude: f64,
@@ -175,7 +175,8 @@ pub struct Touchdown {
 pub struct Location {
     #[serde(flatten)]
     pub system: System,
-    pub body: String,
+    #[serde(rename = "Body")]
+    pub body_name: String,
     #[serde(rename = "BodyID")]
     pub body_id: u64,
     pub body_type: String,  // TODO: Enum?

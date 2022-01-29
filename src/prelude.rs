@@ -7,6 +7,10 @@ pub use crate::system::{
     // TODO: finish and expose here.
     // PowerplayState,
 };
+pub use crate::body::{
+    Body,
+    Signal
+};
 pub use crate::faction::{
     Faction,
     FactionInfo,
