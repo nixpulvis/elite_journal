@@ -1,3 +1,4 @@
+use std::collections::BTreeMap as Map;
 use serde::Deserialize;
 
 #[derive(Deserialize, Eq, PartialEq, Debug)]
@@ -46,7 +47,7 @@ pub struct Body {
     // ...
 
     // else if body_type == planet/moon
-    // pub parents: Vec<(BodyType, i16)>,
+    pub parents: Vec<Map<String, i16>>,
     pub planet_class: Option<String>, // TODO: e.g. "Rocky body"
     pub tidal_lock: Option<bool>,
     pub landable: Option<bool>,
