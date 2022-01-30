@@ -12,6 +12,15 @@ pub struct Entry<E> {
     pub timestamp: DateTime<Utc>,
     #[serde(flatten)]
     pub event: E,
+
+    // TODO: Technically these could belong here:
+    // https://github.com/EDCD/EDDN/blob/master/schemas/journal-v1.0.json
+    //
+    // They would just only live here then.
+    //
+    // pub star_system: String,
+    // pub star_pos: Coordinate,
+    // pub system_address: i64,
 }
 
 #[test]

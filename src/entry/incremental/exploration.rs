@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use crate::prelude::*;
 
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct BuyExplorationData {
@@ -31,8 +32,8 @@ pub struct SellExplorationData {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Material {
-    name: String,
-    percent: f64,
+    pub name: String,
+    pub percent: f64,
 }
 
 pub enum ScanType {
@@ -47,6 +48,9 @@ pub enum ScanType {
 #[serde(rename_all = "PascalCase")]
 pub struct Scan {
     pub scan_type: String,
+    pub star_system: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
     #[serde(flatten)]
     pub body: Body,
     pub materials: Option<Vec<Material>>,

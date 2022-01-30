@@ -1,47 +1,52 @@
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Eq, PartialEq, Debug)]
 pub enum BodyType {
     Star,
     Planet,
-    Moon,
+    PlanetaryRing,
+    Moon, // TODO: Does this actually exist?
+    StellarRing,
+    Station,
+    AsteroidCluster,
 
-    // Special case for a body's parent being a berry-center
+    // Special case for a body's parent being a barycentre
     Null
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Composition {
-    ice: f64,
-    rock: f64,
-    metal: f64,
+    pub ice: f64,
+    pub rock: f64,
+    pub metal: f64,
 }
 
 pub struct Node {
-    body_type: BodyType,
-    body_id: u16,
+    pub body_type: BodyType,
+    pub body_id: i16,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Body {
     #[serde(rename = "BodyID")]
-    pub id: u16,
+    pub id: i16,
     #[serde(rename = "BodyName")]
+    #[serde(alias = "Body")]
     pub name: String,
+    #[serde(rename = "BodyType")]
+    pub ty: Option<BodyType>,
     /// Distance from primary star in light seconds
     #[serde(rename = "DistanceFromArrivalLS")]
-    pub distance_from_arrival: f64,
-
+    #[serde(alias = "DistFromStarLS")]
+    pub distance_from_arrival: Option<f64>,
 
     // if body_type == star
-    #[serde(rename = "StarSystem")]
-    pub system_name: String, // double check this iss aways here
-    // TODO: More star info
+    // ...
 
     // else if body_type == planet/moon
-    // pub parents: Vec<(BodyType, u16)>,
+    // pub parents: Vec<(BodyType, i16)>,
     pub planet_class: Option<String>, // TODO: e.g. "Rocky body"
     pub tidal_lock: Option<bool>,
     pub landable: Option<bool>,
@@ -63,6 +68,7 @@ pub struct Body {
     pub orbital_period: Option<f64>,
     pub rotation_period: Option<f64>,
     pub axial_tilt: Option<f64>,
+
     // TODO: Ring info
 }
 

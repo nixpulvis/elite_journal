@@ -12,12 +12,11 @@ use geozero::{
     GeozeroGeometry
 };
 
-
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct System {
     #[serde(rename = "SystemAddress")]
-    pub address: u64,
+    pub address: i64,
     #[serde(rename = "StarPos")]
     pub pos: Coordinate,
     #[serde(rename = "StarSystem")]
@@ -52,6 +51,28 @@ pub struct System {
     // TODO: Should this even be an enum?
     pub powers: Option<Vec<String>>,
     pub powerplay_state: Option<PowerplayState>,
+}
+
+impl System {
+    pub fn new(address: i64, pos: Coordinate, name: &str) -> Self {
+        System {
+            address,
+            pos,
+            name: name.to_string(),
+
+            population: None,
+            security: None,
+            government: None,
+            allegiance: None,
+            economy: None,
+            second_economy: None,
+            controlling_faction: None,
+            factions: vec![],
+            conflicts: vec![],
+            powers: None,
+            powerplay_state: None,
+        }
+    }
 }
 
 #[test]

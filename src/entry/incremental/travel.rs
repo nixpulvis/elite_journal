@@ -74,7 +74,7 @@ pub struct Undocked {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FsdTarget {
-    pub system_address: u64,
+    pub system_address: i64,
     pub name: String,
     pub star_class: String,  // TODO: Enum?
     #[serde(rename = "RemainingJumpsInRoute")]
@@ -110,7 +110,7 @@ pub struct SupercruiseEntry {
 pub struct SupercruiseExit {
     #[serde(rename = "StarSystem")]
     pub system_name: String,
-    pub body_id: u64,
+    pub body_id: i64,
     pub body: String,
     pub body_type: String,
 }
@@ -133,8 +133,8 @@ pub struct LeaveBody {
     #[serde(rename = "Body")]
     pub name: String,
 
-    pub system_address: u64,
-    pub body_id: u64,
+    pub system_address: i64,
+    pub body_id: i16,
 }
 
 #[derive(Deserialize, Debug)]
@@ -144,7 +144,7 @@ pub struct Liftoff {
     pub system_name: String,
     #[serde(rename = "Body")]
     pub body_name: String,
-    pub body_id: u64,
+    pub body_id: i16,
     pub latitude: f64,
     pub longitude: f64,
     pub on_station: bool,
@@ -156,12 +156,12 @@ pub struct Liftoff {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Touchdown {
-    pub system_address: u64,
+    pub system_address: i64,
     #[serde(rename = "StarSystem")]
     pub system_name: String,
     pub body_name: String,
     #[serde(rename = "BodyID")]
-    pub body_id: u64,
+    pub body_id: i16,
     pub latitude: f64,
     pub longitude: f64,
     pub on_station: bool,
@@ -175,11 +175,8 @@ pub struct Touchdown {
 pub struct Location {
     #[serde(flatten)]
     pub system: System,
-    #[serde(rename = "Body")]
-    pub body_name: String,
-    #[serde(rename = "BodyID")]
-    pub body_id: u64,
-    pub body_type: String,  // TODO: Enum?
+    #[serde(flatten)]
+    pub body: Option<Body>,
     pub latitude: Option<f64>,
     pub longitude: Option<f64>,
     pub docked: bool,

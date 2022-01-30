@@ -9,6 +9,7 @@ pub use crate::system::{
 };
 pub use crate::body::{
     Body,
+    BodyType,
     Signal
 };
 pub use crate::faction::{
