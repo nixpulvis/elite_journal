@@ -54,6 +54,9 @@ pub struct Scan {
     #[serde(flatten)]
     pub body: Body,
     pub materials: Option<Vec<Material>>,
+
+    #[serde(flatten)]
+    pub other: serde_json::Value,
 }
 
 #[derive(Deserialize, Debug)]

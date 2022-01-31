@@ -21,6 +21,17 @@ pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
     }
 }
 
+pub fn empty_str_is_none<'d, D>(deserializer: D) -> Result<Option<String>, D::Error>
+    where D: Deserializer<'d>,
+{
+    let string = String::deserialize(deserializer)?;
+    if string == "" {
+        Ok(None)
+    } else {
+        Ok(Some(string))
+    }
+}
+
 ///     #[serde(deserialize_with = "de::zero_is_none")]
 ///     pub population: Option<u64>,
 
