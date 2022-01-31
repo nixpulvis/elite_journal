@@ -1,9 +1,8 @@
-use serde::Deserialize;
-
+use serde::{Serialize, Deserialize};
 
 /// These are just the game's names, they don't really make sense since tritium is an isotope
 /// of hydrogen.
-#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum Fuel {
     /// When we enter for fleet carriers, not the event
@@ -18,7 +17,7 @@ impl Default for Fuel {
     }
 }
 
-#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
 pub struct JumpCost {
     #[serde(skip)]
     pub ty: Fuel,

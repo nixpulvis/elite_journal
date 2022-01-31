@@ -28,7 +28,7 @@
 // https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
 #![allow(unused_braces)]
 
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use self::de::Nullable;
 
 /// All shared data models used throughout the events
@@ -79,7 +79,7 @@ pub mod de;
 
 
 /// System and faction's organizational structure
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Government {
@@ -155,7 +155,7 @@ fn government() {
 
 
 /// System and faction's alignment to the broader groups
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Allegiance {

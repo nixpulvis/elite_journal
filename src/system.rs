@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use crate::{de::*, prelude::*};
 
 #[cfg(all(unix, feature = "with-postgis-sqlx"))]
@@ -12,7 +12,7 @@ use geozero::{
     GeozeroGeometry
 };
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct System {
     #[serde(rename = "SystemAddress")]
@@ -100,7 +100,7 @@ fn system() {
 }
 
 
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Security {
@@ -174,7 +174,7 @@ fn security() {
 }
 
 // TODO: test
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,
@@ -187,7 +187,7 @@ pub enum PowerplayState {
 }
 
 
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Economy {
@@ -258,7 +258,7 @@ fn economy() {
 }
 
 
-#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct Coordinate {
     pub x: f64,
     pub y: f64,

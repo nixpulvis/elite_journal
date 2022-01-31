@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use crate::{de::*, prelude::*};
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Faction {
     pub name: String,
@@ -27,7 +27,7 @@ fn faction() {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionInfo {
     pub name: String,
@@ -79,7 +79,7 @@ fn faction_info() {
 }
 
 
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum State {
@@ -169,7 +169,7 @@ fn state() {
 }
 
 
-#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum Status {
     #[serde(rename = "active")]
@@ -198,7 +198,7 @@ fn status() {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct StateTrend {
     pub state: State,
@@ -225,7 +225,7 @@ fn state_trend() {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionConflict {
     /// A conflict's type determines what triggers it and the way it is resolved.
@@ -255,7 +255,7 @@ fn conflict() {
 }
 
 
-#[derive(Deserialize, Debug, Copy, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[cfg_attr(all(unix, feature = "with-sqlx"), sqlx(type_name = "Conflict"))]
 pub enum FactionConflictType {
@@ -278,7 +278,7 @@ fn conflict_type() {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionConflictProgress {
     pub name: String,
@@ -294,7 +294,7 @@ fn conflict_progress() {
 }
 
 
-#[derive(Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Happiness {

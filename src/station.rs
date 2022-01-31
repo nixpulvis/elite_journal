@@ -1,7 +1,7 @@
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use crate::prelude::*;
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Station {
     #[serde(rename = "DistFromStarLS")]
     pub dist_from_star_ls: Option<f64>,
@@ -26,7 +26,7 @@ pub struct Station {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum StationType {
     AsteroidBase,
@@ -40,14 +40,14 @@ pub enum StationType {
     Outpost,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum PadSize {
     Small,
     Medium,
     Large,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum DockingDeniedReason {
     NoSpace,
     TooLarge,
@@ -58,7 +58,7 @@ pub enum DockingDeniedReason {
     NoReason,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum Services {
     #[serde(rename = "autodock")]
@@ -124,7 +124,7 @@ pub enum Services {
 }
 
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct EconomyShare {
     pub name: Economy,

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap as Map;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Deserialize, Eq, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Debug)]
 pub enum BodyType {
     Star,
     Planet,
@@ -15,7 +15,7 @@ pub enum BodyType {
     Null
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Composition {
     pub ice: f64,
@@ -28,7 +28,7 @@ pub struct Node {
     pub body_id: i16,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Body {
     #[serde(rename = "BodyID")]
@@ -73,7 +73,7 @@ pub struct Body {
     // TODO: Ring info
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Signal {
     // e.g. Alexandrite
