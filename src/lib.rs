@@ -28,8 +28,8 @@
 // https://github.com/launchbadge/sqlx/issues/657#issuecomment-774040177
 #![allow(unused_braces)]
 
-use serde::{Serialize, Deserialize};
 use self::de::Nullable;
+use serde::{Deserialize, Serialize};
 
 /// All shared data models used throughout the events
 ///
@@ -49,12 +49,7 @@ pub mod prelude;
 
 /// Journal and status file entries
 pub mod entry;
-pub use self::entry::{
-    parse_status_file,
-    parse_journal_file,
-    parse_journal_dir,
-    Entry
-};
+pub use self::entry::{parse_journal_dir, parse_journal_file, parse_status_file, Entry};
 
 /// A star system, located in static 3D space
 pub mod system;
@@ -76,7 +71,6 @@ pub mod ship;
 
 /// Serde helper deserializers
 pub mod de;
-
 
 /// System and faction's organizational structure
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
@@ -139,20 +133,31 @@ impl PartialEq for Government {
 
 #[test]
 fn government() {
-    let high_tech = serde_json::from_str(r#"
+    let high_tech = serde_json::from_str(
+        r#"
         "Prison Colony"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Government::PrisonColony, high_tech);
-    let extraction = serde_json::from_str(r#"
+    let extraction = serde_json::from_str(
+        r#"
         "$government_Dictatorship;"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Government::Dictatorship, extraction);
     assert!(Government::None != Government::None);
-    assert!(serde_json::from_str::<Government>(r#""$government_None;""#).unwrap().is_null());
-    assert!(serde_json::from_str::<Government>(r#""None""#).unwrap().is_null());
-    assert!(serde_json::from_str::<Government>(r#""""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Government>(r#""$government_None;""#)
+        .unwrap()
+        .is_null());
+    assert!(serde_json::from_str::<Government>(r#""None""#)
+        .unwrap()
+        .is_null());
+    assert!(serde_json::from_str::<Government>(r#""""#)
+        .unwrap()
+        .is_null());
 }
-
 
 /// System and faction's alignment to the broader groups
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
@@ -192,15 +197,25 @@ impl PartialEq for Allegiance {
 
 #[test]
 fn allegiance() {
-    let pilots_federation = serde_json::from_str(r#"
+    let pilots_federation = serde_json::from_str(
+        r#"
         "Pilots Federation"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Allegiance::PilotsFederation, pilots_federation);
-    let player_pilots = serde_json::from_str(r#"
+    let player_pilots = serde_json::from_str(
+        r#"
         "PlayerPilots"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Allegiance::PlayerPilots, player_pilots);
     assert!(Allegiance::None != Allegiance::None);
-    assert!(serde_json::from_str::<Allegiance>(r#""None""#).unwrap().is_null());
-    assert!(serde_json::from_str::<Allegiance>(r#""""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Allegiance>(r#""None""#)
+        .unwrap()
+        .is_null());
+    assert!(serde_json::from_str::<Allegiance>(r#""""#)
+        .unwrap()
+        .is_null());
 }

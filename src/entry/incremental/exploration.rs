@@ -1,6 +1,5 @@
-use serde::Deserialize;
 use crate::prelude::*;
-
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -8,7 +7,7 @@ pub struct BuyExplorationData {
     /// System name of purchased data
     pub system: String,
     /// Cost for system data
-    pub cost : u64,
+    pub cost: u64,
 }
 
 #[derive(Deserialize, Debug)]
@@ -41,7 +40,7 @@ pub enum ScanType {
     Detailed,
     NavBeacon,
     NavBeaconDetail,
-    AutoScan
+    AutoScan,
 }
 
 #[derive(Deserialize, Debug)]
@@ -65,5 +64,5 @@ pub struct SAASignalsFound {
     /// The target body for the surface scan
     pub body: Body,
     /// Detected nearby signals
-    pub signals: Vec<Signal>
+    pub signals: Vec<Signal>,
 }

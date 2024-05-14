@@ -1,6 +1,6 @@
-use std::cmp::Ordering;
-use serde::{Serialize, Deserialize};
 use crate::{de::*, prelude::*};
+use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -14,18 +14,23 @@ pub struct Faction {
 
 #[test]
 fn faction() {
-    assert!(serde_json::from_str::<Faction>(r#"
+    assert!(serde_json::from_str::<Faction>(
+        r#"
         { "Name": "Faction A" }
-    "#).is_ok());
-    let faction = serde_json::from_str::<Faction>(r#"
+    "#
+    )
+    .is_ok());
+    let faction = serde_json::from_str::<Faction>(
+        r#"
         {
             "Name": "Faction A",
             "FactionState": ""
         }
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(None, faction.state);
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -58,7 +63,8 @@ pub struct FactionInfo {
 
 #[test]
 fn faction_info() {
-    let info = serde_json::from_str::<FactionInfo>(r#"
+    let info = serde_json::from_str::<FactionInfo>(
+        r#"
         {
             "Name": "Faction A",
             "FactionState": "None",
@@ -70,14 +76,15 @@ fn faction_info() {
             "ActiveStates": [],
             "RecoveringStates": []
         }
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(None, info.state);
     assert_eq!(None, info.happiness);
     assert!(!info.squadron_faction);
     assert!(!info.home_system);
     assert!(!info.happiest_system);
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -134,7 +141,7 @@ pub enum State {
     TradeWar,
     War,
     #[serde(alias = "")]
-    None
+    None,
 }
 
 impl Nullable for State {
@@ -157,17 +164,22 @@ impl PartialEq for State {
 
 #[test]
 fn state() {
-    let revolution = serde_json::from_str(r#"
+    let revolution = serde_json::from_str(
+        r#"
         "Revolution"
-    "#).unwrap();
-    let none = serde_json::from_str(r#"
+    "#,
+    )
+    .unwrap();
+    let none = serde_json::from_str(
+        r#"
         ""
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(State::Revolution, revolution);
     assert!(State::None != none);
     assert!(none.is_null());
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -197,7 +209,6 @@ fn status() {
     assert!(active > pending && pending > recovering);
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct StateTrend {
@@ -210,20 +221,39 @@ pub struct StateTrend {
 
 #[test]
 fn state_trend() {
-    assert!(serde_json::from_str::<StateTrend>(r#"
+    assert!(serde_json::from_str::<StateTrend>(
+        r#"
         { "State": "Expansion" }
-    "#).is_ok());
-    assert!(serde_json::from_str::<StateTrend>(r#"
+    "#
+    )
+    .is_ok());
+    assert!(serde_json::from_str::<StateTrend>(
+        r#"
         { "State": "Expansion", "Trend": null }
-    "#).is_ok());
-    assert_eq!(serde_json::from_str::<StateTrend>(r#"
+    "#
+    )
+    .is_ok());
+    assert_eq!(
+        serde_json::from_str::<StateTrend>(
+            r#"
         { "State": "Expansion", "Trend": 0 }
-    "#).unwrap().trend, None);
-    assert_eq!(serde_json::from_str::<StateTrend>(r#"
+    "#
+        )
+        .unwrap()
+        .trend,
+        None
+    );
+    assert_eq!(
+        serde_json::from_str::<StateTrend>(
+            r#"
         { "State": "Expansion", "Trend": 1 }
-    "#).unwrap().trend, Some(1));
+    "#
+        )
+        .unwrap()
+        .trend,
+        Some(1)
+    );
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -244,16 +274,18 @@ pub struct FactionConflict {
 
 #[test]
 fn conflict() {
-    assert!(serde_json::from_str::<FactionConflict>(r#"
+    assert!(serde_json::from_str::<FactionConflict>(
+        r#"
         {
             "WarType": "civilwar",
             "Status": "active",
             "Faction1": { "Name": "Faction A", "Stake": "Installation X", "WonDays": 2 },
             "Faction2": { "Name": "Faction A", "Stake": "Installation X", "WonDays": 2 }
         }
-    "#).is_ok());
+    "#
+    )
+    .is_ok());
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -277,7 +309,6 @@ fn conflict_type() {
     assert_eq!(FactionConflictType::Election, election);
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct FactionConflictProgress {
@@ -288,11 +319,13 @@ pub struct FactionConflictProgress {
 
 #[test]
 fn conflict_progress() {
-    assert!(serde_json::from_str::<FactionConflictProgress>(r#"
+    assert!(serde_json::from_str::<FactionConflictProgress>(
+        r#"
         { "Name": "Faction A", "Stake": "Installation X", "WonDays": 2 }
-    "#).is_ok());
+    "#
+    )
+    .is_ok());
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -332,25 +365,33 @@ impl PartialEq for Happiness {
 
 impl PartialOrd for Happiness {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.is_null() || other.is_null() { return None }
+        if self.is_null() || other.is_null() {
+            return None;
+        }
         (*other as u8).partial_cmp(&(*self as u8))
     }
 }
 
 #[test]
 fn happiness() {
-    let elated = serde_json::from_str(r#"
+    let elated = serde_json::from_str(
+        r#"
         "$Faction_HappinessBand1;"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Happiness::Elated, elated);
-    let unhappy = serde_json::from_str(r#"
+    let unhappy = serde_json::from_str(
+        r#"
         "$Faction_HappinessBand4;"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     let none = serde_json::from_str(r#""""#).unwrap();
     assert_eq!(Happiness::Unhappy, unhappy);
     assert!(elated > unhappy);
     assert!(Happiness::None != none);
-    assert!(! (elated > Happiness::None));
-    assert!(! (elated < Happiness::None));
+    assert!(!(elated > Happiness::None));
+    assert!(!(elated < Happiness::None));
     assert!(none.is_null());
 }

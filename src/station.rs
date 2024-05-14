@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Station {
@@ -24,7 +24,6 @@ pub struct Station {
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
     pub wanted: Option<bool>,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -122,7 +121,6 @@ pub enum Services {
     #[serde(rename = "voucherredemption")]
     VoucherRedemption,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]

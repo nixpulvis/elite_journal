@@ -1,16 +1,14 @@
-use std::cmp::Ordering;
-use serde::{Serialize, Deserialize};
 use crate::{de::*, prelude::*};
+use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
-#[cfg(all(unix, feature = "with-postgis-sqlx"))]
-use std::io::Read;
 #[cfg(all(unix, feature = "with-postgis-sqlx"))]
 use geozero::{
     wkb::{FromWkb, WkbDialect},
-    CoordDimensions,
-    GeomProcessor,
-    GeozeroGeometry
+    CoordDimensions, GeomProcessor, GeozeroGeometry,
 };
+#[cfg(all(unix, feature = "with-postgis-sqlx"))]
+use std::io::Read;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -77,7 +75,8 @@ impl System {
 
 #[test]
 fn system() {
-    let system = serde_json::from_str::<System>(r#"
+    let system = serde_json::from_str::<System>(
+        r#"
         {
             "StarPos": [123.321, 1337.42, 0.0],
             "StarSystem": "Somewhere",
@@ -89,7 +88,9 @@ fn system() {
             "SystemEconomy": "",
             "SystemSecondEconomy": ""
         }
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(0., system.pos.z);
     assert_eq!(None, system.population);
     assert_eq!(None, system.security);
@@ -98,7 +99,6 @@ fn system() {
     assert_eq!(None, system.economy);
     assert_eq!(None, system.second_economy);
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -143,24 +143,33 @@ impl PartialOrd for Security {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (*other, *self) {
             (_, Security::None) | (Security::None, _) => None,
-            (l, r) => (l as u8).partial_cmp(&(r as u8))
+            (l, r) => (l as u8).partial_cmp(&(r as u8)),
         }
     }
 }
 
 #[test]
 fn security() {
-    let high = serde_json::from_str(r#"
+    let high = serde_json::from_str(
+        r#"
         "$SYSTEM_SECURITY_high;"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Security::High, high);
-    let low = serde_json::from_str(r#"
+    let low = serde_json::from_str(
+        r#"
         "$GAlAXY_MAP_INFO_state_low;"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Security::Low, low);
-    let anarchy = serde_json::from_str(r#"
+    let anarchy = serde_json::from_str(
+        r#"
         "Anarchy"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Security::Anarchy, anarchy);
     assert!(anarchy.is_null());
     let none = serde_json::from_str(r#""""#).unwrap();
@@ -185,7 +194,6 @@ pub enum PowerplayState {
     Turmoil,
     HomeSystem,
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
@@ -243,20 +251,29 @@ impl PartialEq for Economy {
 
 #[test]
 fn economy() {
-    let high_tech = serde_json::from_str(r#"
+    let high_tech = serde_json::from_str(
+        r#"
         "High Tech"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Economy::HighTech, high_tech);
-    let extraction = serde_json::from_str(r#"
+    let extraction = serde_json::from_str(
+        r#"
         "$economy_Extraction;"
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     assert_eq!(Economy::Extraction, extraction);
     assert!(Economy::None != Economy::None);
-    assert!(serde_json::from_str::<Economy>(r#""$economy_None;""#).unwrap().is_null());
-    assert!(serde_json::from_str::<Economy>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Economy>(r#""$economy_None;""#)
+        .unwrap()
+        .is_null());
+    assert!(serde_json::from_str::<Economy>(r#""None""#)
+        .unwrap()
+        .is_null());
     assert!(serde_json::from_str::<Economy>(r#""""#).unwrap().is_null());
 }
-
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct Coordinate {
@@ -271,10 +288,16 @@ impl GeomProcessor for Coordinate {
         CoordDimensions::xyz()
     }
 
-    fn coordinate(&mut self, x: f64, y: f64, z: Option<f64>,
-        _m: Option<f64>, _t: Option<f64>, _tm: Option<u64>, _idx: usize,)
-        -> geozero::error::Result<()>
-    {
+    fn coordinate(
+        &mut self,
+        x: f64,
+        y: f64,
+        z: Option<f64>,
+        _m: Option<f64>,
+        _t: Option<f64>,
+        _tm: Option<u64>,
+        _idx: usize,
+    ) -> geozero::error::Result<()> {
         self.x = x;
         self.y = y;
         self.z = z.unwrap_or(0.0);
@@ -284,9 +307,10 @@ impl GeomProcessor for Coordinate {
 
 #[cfg(all(unix, feature = "with-postgis-sqlx"))]
 impl GeozeroGeometry for Coordinate {
-    fn process_geom<P: GeomProcessor>(&self, processor: &mut P)
-        -> std::result::Result<(), geozero::error::GeozeroError>
-    {
+    fn process_geom<P: GeomProcessor>(
+        &self,
+        processor: &mut P,
+    ) -> std::result::Result<(), geozero::error::GeozeroError> {
         processor.point_begin(0)?;
         processor.coordinate(self.x, self.y, Some(self.z), None, None, None, 0)?;
         processor.point_end(0)
@@ -301,7 +325,11 @@ impl GeozeroGeometry for Coordinate {
 #[cfg(all(unix, feature = "with-postgis-sqlx"))]
 impl FromWkb for Coordinate {
     fn from_wkb<R: Read>(rdr: &mut R, dialect: WkbDialect) -> geozero::error::Result<Self> {
-        let mut pt = Coordinate { x: 0., y: 0., z: 0. };
+        let mut pt = Coordinate {
+            x: 0.,
+            y: 0.,
+            z: 0.,
+        };
         geozero::wkb::process_wkb_type_geom(rdr, &mut pt, dialect)?;
         Ok(pt)
     }

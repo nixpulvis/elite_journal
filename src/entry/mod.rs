@@ -1,10 +1,10 @@
+use chrono::prelude::*;
+use serde::Deserialize;
+use std::error::Error;
+use std::ffi::OsStr;
 use std::fs::{read_dir, File};
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use std::error::Error;
-use std::ffi::OsStr;
-use serde::Deserialize;
-use chrono::prelude::*;
 
 /// A single timestamped entry, containing an [`Event`], [`NavRoute`], etc.
 #[derive(Deserialize, Debug, PartialEq)]
@@ -12,7 +12,6 @@ pub struct Entry<E> {
     pub timestamp: DateTime<Utc>,
     #[serde(flatten)]
     pub event: E,
-
     // TODO: Technically these could belong here:
     // https://github.com/EDCD/EDDN/blob/master/schemas/journal-v1.0.json
     //
@@ -28,39 +27,49 @@ fn entry() {
     use crate::Government;
 
     #[derive(Deserialize)]
-    enum Dumb { Foo }
-    assert!(serde_json::from_str::<Entry<Dumb>>(r#"
+    enum Dumb {
+        Foo,
+    }
+    assert!(serde_json::from_str::<Entry<Dumb>>(
+        r#"
         {
             "timestamp": "1970-01-01T00:00:00Z",
             "Foo": null
         }
-    "#).is_ok());
+    "#
+    )
+    .is_ok());
     #[derive(Deserialize)]
     #[serde(rename_all = "PascalCase")]
     #[allow(unused)]
     struct Dumber {
         key: (),
     }
-    assert!(serde_json::from_str::<Entry<Dumber>>(r#"
+    assert!(serde_json::from_str::<Entry<Dumber>>(
+        r#"
         {
             "timestamp": "1970-01-01T00:00:00Z",
             "Key": null
         }
-    "#).is_ok());
+    "#
+    )
+    .is_ok());
     #[derive(Deserialize)]
     #[serde(rename_all = "PascalCase")]
     #[allow(unused)]
     struct Dumbest {
         key: Government,
     }
-    assert!(serde_json::from_str::<Entry<Dumbest>>(r#"
+    assert!(serde_json::from_str::<Entry<Dumbest>>(
+        r#"
         {
             "timestamp": "1970-01-01T00:00:00Z",
             "Key": "Anarchy"
         }
-    "#).is_ok());
+    "#
+    )
+    .is_ok());
 }
-
 
 /// Parse a single file's worth of journal entries
 // TODO: Our own error types.
@@ -69,9 +78,10 @@ fn entry() {
 pub fn parse_journal_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
-    Ok(reader.lines().map(|line| {
-        serde_json::from_str(&line.unwrap()).unwrap()
-    }).collect())
+    Ok(reader
+        .lines()
+        .map(|line| serde_json::from_str(&line.unwrap()).unwrap())
+        .collect())
 }
 
 /// Parse all journals file's entries in a directory
@@ -82,8 +92,8 @@ pub fn parse_journal_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, B
     let mut entries = Vec::new();
     for entry in read_dir(path)? {
         let entry = entry?;
-        if entry.file_type().unwrap().is_file() &&
-           entry.path().extension().and_then(OsStr::to_str) == Some("log")
+        if entry.file_type().unwrap().is_file()
+            && entry.path().extension().and_then(OsStr::to_str) == Some("log")
         {
             entries.append(&mut parse_journal_file(entry.path())?);
         }
@@ -91,17 +101,16 @@ pub fn parse_journal_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, B
     Ok(entries)
 }
 
-
 /// Parse a status file entry
 // TODO: Our own error types.
 pub fn parse_status_file<P: AsRef<Path>, E>(path: P) -> Result<Entry<E>, serde_json::Error>
-    where for<'de> E: Deserialize<'de>
+where
+    for<'de> E: Deserialize<'de>,
 {
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
     serde_json::from_reader(reader)
 }
-
 
 /// `Journal.<timestamp>.<part>.log`
 ///

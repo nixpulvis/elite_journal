@@ -1,6 +1,6 @@
-use std::collections::BTreeMap as Map;
-use serde::{Serialize, Deserialize};
 use crate::de;
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap as Map;
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug)]
 pub enum BodyType {
@@ -13,7 +13,7 @@ pub enum BodyType {
     AsteroidCluster,
 
     // Special case for a body's parent being a barycentre
-    Null
+    Null,
 }
 
 // TODO: enum AtmosphereType {}
@@ -81,7 +81,6 @@ pub struct Body {
 
     // TODO: Ring info
     // pub reserve_level: Option<String>,
-
     pub was_mapped: bool,
     pub was_discovered: bool,
 }

@@ -5,9 +5,11 @@ pub trait Nullable {
 }
 
 // TODO: tests
-pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
-    -> Result<Option<T>, D::Error>
-    where D: Deserializer<'d>,
+pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(
+    deserializer: D,
+) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'d>,
 {
     let variant = Option::<T>::deserialize(deserializer)?;
     if let Some(v) = variant {
@@ -22,7 +24,8 @@ pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(deserializer: D)
 }
 
 pub fn empty_str_is_none<'d, D>(deserializer: D) -> Result<Option<String>, D::Error>
-    where D: Deserializer<'d>,
+where
+    D: Deserializer<'d>,
 {
     let string = String::deserialize(deserializer)?;
     if string == "" {
@@ -36,9 +39,11 @@ pub fn empty_str_is_none<'d, D>(deserializer: D) -> Result<Option<String>, D::Er
 ///     pub population: Option<u64>,
 
 // TODO: tests
-pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(deserializer: D)
-    -> Result<Option<T>, D::Error>
-    where D: Deserializer<'d>,
+pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(
+    deserializer: D,
+) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'d>,
 {
     let number = Option::<T>::deserialize(deserializer)?;
     if let Some(n) = number {

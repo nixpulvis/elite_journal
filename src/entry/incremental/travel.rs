@@ -1,6 +1,5 @@
-use serde::Deserialize;
 use crate::prelude::*;
-
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -76,7 +75,7 @@ pub struct Undocked {
 pub struct FsdTarget {
     pub system_address: i64,
     pub name: String,
-    pub star_class: String,  // TODO: Enum?
+    pub star_class: String, // TODO: Enum?
     #[serde(rename = "RemainingJumpsInRoute")]
     pub remaining: Option<u16>,
 }

@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use crate::entry::route::NavRoute;
+use serde::Deserialize;
 
 // "AfmuRepairs"
 // "ApproachSettlement"
@@ -170,7 +170,6 @@ use crate::entry::route::NavRoute;
 // "WingJoin"
 // "WingLeave"
 
-
 /// Information provided by the player journal
 #[derive(Deserialize, Debug)]
 #[serde(tag = "event")]
@@ -203,7 +202,6 @@ pub enum Event {
     FsdJump(travel::FsdJump),
     // TODO: next
     // CarrierJump(travel::CarrierJump),
-
     /// Signals an update to the [`NavRoute.json`][crate::entry::route] file
     NavRoute(NavRoute),
 
@@ -219,7 +217,6 @@ pub enum Event {
     Other,
 }
 
-
+pub mod exploration;
 pub mod startup;
 pub mod travel;
-pub mod exploration;

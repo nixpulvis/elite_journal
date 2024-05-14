@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// These are just the game's names, they don't really make sense since tritium is an isotope
 /// of hydrogen.
