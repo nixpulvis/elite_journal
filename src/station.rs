@@ -1,3 +1,4 @@
+#[cfg(feature = "with-sqlx")]
 use sqlx::postgres::{PgTypeInfo, PgHasArrayType};
 use serde::{Serialize, Deserialize};
 use crate::prelude::*;
