@@ -124,6 +124,7 @@ pub enum Service {
     VoucherRedemption,
 }
 
+#[cfg(feature = "with-sqlx")]
 impl PgHasArrayType for Service {
     fn array_type_info() -> PgTypeInfo {
         PgTypeInfo::with_name("service[]")
