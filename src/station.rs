@@ -1,5 +1,6 @@
+use sqlx::postgres::{PgTypeInfo, PgHasArrayType};
+use serde::{Serialize, Deserialize};
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Station {
@@ -18,14 +19,14 @@ pub struct Station {
     #[serde(rename = "StationAllegiance")]
     pub allegiance: Option<Allegiance>,
     #[serde(rename = "StationServices")]
-    pub services: Vec<Services>,
+    pub services: Vec<Service>,
     #[serde(rename = "StationEconomies")]
     pub economies: Vec<EconomyShare>,
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
     pub wanted: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum StationType {
     AsteroidBase,
@@ -57,9 +58,9 @@ pub enum DockingDeniedReason {
     NoReason,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
-pub enum Services {
+pub enum Service {
     #[serde(rename = "autodock")]
     Autodock,
     #[serde(rename = "blackmarket")]
@@ -120,6 +121,12 @@ pub enum Services {
     Tuning,
     #[serde(rename = "voucherredemption")]
     VoucherRedemption,
+}
+
+impl PgHasArrayType for Service {
+    fn array_type_info() -> PgTypeInfo {
+        PgTypeInfo::with_name("service[]")
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
