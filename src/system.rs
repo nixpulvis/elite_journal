@@ -16,7 +16,7 @@ pub struct System {
     #[serde(rename = "SystemAddress")]
     pub address: i64,
     #[serde(rename = "StarPos")]
-    pub pos: Coordinate,
+    pub pos: Option<Coordinate>,
     #[serde(rename = "StarSystem")]
     pub name: String,
 
@@ -52,12 +52,12 @@ pub struct System {
 }
 
 impl System {
-    pub fn new(address: i64, pos: Coordinate, name: &str) -> Self {
+    pub fn new(address: i64, name: &str) -> Self {
         System {
             address,
-            pos,
             name: name.to_string(),
 
+            pos: None,
             population: None,
             security: None,
             government: None,
@@ -91,7 +91,7 @@ fn system() {
     "#,
     )
     .unwrap();
-    assert_eq!(0., system.pos.z);
+    assert_eq!(Some(0.), system.pos.map(|p| p.z));
     assert_eq!(None, system.population);
     assert_eq!(None, system.security);
     assert_eq!(None, system.government);

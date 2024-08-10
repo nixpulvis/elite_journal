@@ -22,7 +22,7 @@ pub struct Station {
     #[serde(rename = "StationServices")]
     pub services: Option<Vec<Service>>,
     #[serde(rename = "StationEconomies")]
-    pub economies: Vec<EconomyShare>,
+    pub economies: Option<Vec<EconomyShare>>,
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
     pub wanted: Option<bool>,
 }
@@ -122,6 +122,20 @@ pub enum Service {
     Tuning,
     #[serde(rename = "voucherredemption")]
     VoucherRedemption,
+    #[serde(rename = "livery")]
+    Livery,
+    #[serde(rename = "socialspace")]
+    SocialSpace,
+    #[serde(rename = "bartender")]
+    Bartender,
+    #[serde(rename = "vistagenomics")]
+    VistaGenomics,
+    #[serde(rename = "pioneersupplies")]
+    PioneerSupplies,
+    #[serde(rename = "apexinterstellar")]
+    ApexInterstellar,
+    #[serde(rename = "frontlinesolutions")]
+    FrontlineSolutions,
 }
 
 #[cfg(feature = "with-sqlx")]
@@ -131,9 +145,19 @@ impl PgHasArrayType for Service {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub struct EconomyShare {
     pub name: Economy,
     pub proportion: f64,
+}
+
+impl Eq for EconomyShare {}
+
+#[cfg(feature = "with-sqlx")]
+impl PgHasArrayType for EconomyShare {
+    fn array_type_info() -> PgTypeInfo {
+        PgTypeInfo::with_name("_economyshare")
+    }
 }
