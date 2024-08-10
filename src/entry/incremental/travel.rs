@@ -59,6 +59,7 @@ pub struct DockingTimeout {
 pub struct Docked {
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
     pub active_fine: Option<bool>,
+    pub system_address: i64,
     #[serde(flatten)]
     pub station: Station,
 }

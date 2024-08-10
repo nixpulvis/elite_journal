@@ -10,17 +10,17 @@ pub struct Station {
     #[serde(rename = "StationName")]
     pub name: String,
     #[serde(rename = "StationType")]
-    pub ty: StationType,
+    pub ty: Option<StationType>,
     #[serde(rename = "MarketID")]
-    pub market_id: u64,
+    pub market_id: Option<i64>,
     #[serde(rename = "StationFaction")]
-    pub faction: Faction,
+    pub faction: Option<Faction>,
     #[serde(rename = "StationGovernment")]
-    pub government: Government,
+    pub government: Option<Government>,
     #[serde(rename = "StationAllegiance")]
     pub allegiance: Option<Allegiance>,
     #[serde(rename = "StationServices")]
-    pub services: Vec<Service>,
+    pub services: Option<Vec<Service>>,
     #[serde(rename = "StationEconomies")]
     pub economies: Vec<EconomyShare>,
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.

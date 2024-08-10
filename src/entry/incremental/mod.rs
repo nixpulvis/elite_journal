@@ -184,6 +184,7 @@ pub enum Event {
 
     Location(travel::Location),
 
+    // #[serde(rename = "Docked")]
     Docked(travel::Docked),
 
     DockingGranted(travel::DockingGranted),
