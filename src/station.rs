@@ -1,7 +1,7 @@
-#[cfg(feature = "with-sqlx")]
-use sqlx::postgres::{PgTypeInfo, PgHasArrayType};
-use serde::{Serialize, Deserialize};
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "with-sqlx")]
+use sqlx::postgres::{PgHasArrayType, PgTypeInfo};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Station {
