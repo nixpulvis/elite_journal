@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "with-sqlx")]
@@ -40,6 +41,13 @@ pub enum StationType {
     Orbis,
     Outpost,
 }
+
+impl fmt::Display for StationType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum PadSize {
