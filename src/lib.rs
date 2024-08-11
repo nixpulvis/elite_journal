@@ -30,6 +30,7 @@
 
 use self::de::Nullable;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 /// All shared data models used throughout the events
 ///
@@ -113,6 +114,12 @@ pub enum Government {
     None,
 }
 
+impl fmt::Display for Government {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl Nullable for Government {
     fn is_null(&self) -> bool {
         match self {
@@ -175,6 +182,12 @@ pub enum Allegiance {
     Thargoid,
     #[serde(alias = "")]
     None,
+}
+
+impl fmt::Display for Allegiance {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl Nullable for Allegiance {

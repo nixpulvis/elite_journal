@@ -1,6 +1,7 @@
 use crate::{de::*, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+use std::fmt;
 
 #[cfg(all(unix, feature = "with-postgis-sqlx"))]
 use geozero::{
@@ -120,6 +121,12 @@ pub enum Security {
     None,
 }
 
+impl fmt::Display for Security {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl Nullable for Security {
     fn is_null(&self) -> bool {
         match self {
@@ -231,6 +238,12 @@ pub enum Economy {
     None,
 }
 
+impl fmt::Display for Economy {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl Nullable for Economy {
     fn is_null(&self) -> bool {
         match self {
@@ -280,6 +293,12 @@ pub struct Coordinate {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+}
+
+impl fmt::Display for Coordinate {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({},{},{})", self.x, self.y, self.z)
+    }
 }
 
 #[cfg(all(unix, feature = "with-postgis-sqlx"))]
