@@ -14,6 +14,8 @@ pub struct Station {
     pub ty: Option<StationType>,
     #[serde(rename = "MarketID")]
     pub market_id: Option<i64>,
+    #[serde(rename = "LandingPads")]
+    pub landing_pads: Option<LandingPads>,
     #[serde(rename = "StationFaction")]
     pub faction: Option<Faction>,
     #[serde(rename = "StationGovernment")]
@@ -26,6 +28,15 @@ pub struct Station {
     pub economies: Option<Vec<EconomyShare>>,
     // NOTE: Should really be Some(false) when parsed locally. EDDN filters this field.
     pub wanted: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
+#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[serde(rename_all = "PascalCase")]
+pub struct LandingPads {
+    pub large: i16,
+    pub medium: i16,
+    pub small: i16,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
