@@ -20,6 +20,10 @@ pub struct Entry<E> {
     // pub star_system: String,
     // pub star_pos: Coordinate,
     // pub system_address: i64,
+    #[serde(default)]
+    pub horizons: bool,
+    #[serde(default)]
+    pub odyssey: bool,
 }
 
 #[test]
