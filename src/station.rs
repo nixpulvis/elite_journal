@@ -39,6 +39,12 @@ pub struct LandingPads {
     pub small: i16,
 }
 
+impl fmt::Display for LandingPads {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Large: {}, Medium: {}, Small: {}", self.large, self.medium, self.small)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
 pub enum StationType {
