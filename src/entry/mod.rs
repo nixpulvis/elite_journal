@@ -139,7 +139,8 @@ pub use self::route::NavRoute;
 pub mod cargo {}
 
 /// `Market.json` TODO
-pub mod market {}
+pub mod market;
+pub use self::market::Market;
 
 /// `Shipyard.json` TODO
 pub mod shipyard {}
