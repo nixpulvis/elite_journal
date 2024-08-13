@@ -1,5 +1,3 @@
-use std::fmt;
-use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "with-sqlx")]
 use sqlx::postgres::{PgHasArrayType, PgTypeInfo};
