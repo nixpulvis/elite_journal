@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub enum Fuel {
     /// When we enter for fleet carriers, not the event
     Tritium,
-    /// Ship fuel from the [`elite_journal::entry::incremental::travel::FsdJump`]
+    /// Ship fuel from the [`crate::entry::incremental::travel::FsdJump`]
     Hydrogen,
 }
 

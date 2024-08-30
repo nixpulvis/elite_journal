@@ -35,8 +35,8 @@ where
     }
 }
 
-///     #[serde(deserialize_with = "de::zero_is_none")]
-///     pub population: Option<u64>,
+//     #[serde(deserialize_with = "de::zero_is_none")]
+//     pub population: Option<u64>,
 
 // TODO: tests
 pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(
