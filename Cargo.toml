@@ -1,7 +1,7 @@
 [package]
 name = "elite_journal"
 description = "Elite: Dangerous journal file stuctures and parsers"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["Nathan Lilienthal <nathan@nixpulvis.com>"]
 license = "Beerware"
 edition = "2018"
