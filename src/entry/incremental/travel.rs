@@ -112,7 +112,7 @@ pub struct SupercruiseEntry {
 pub struct SupercruiseExit {
     #[serde(rename = "StarSystem")]
     pub system_name: String,
-    pub body_id: i64,
+    pub body_id: i16,
     pub body: String,
     pub body_type: String,
 }

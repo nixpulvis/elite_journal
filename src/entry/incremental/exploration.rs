@@ -28,19 +28,19 @@ pub struct SellExplorationData {
     pub total_earnings: u64,
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "PascalCase")]
-pub struct Material {
-    pub name: String,
-    pub percent: f64,
-}
-
 pub enum ScanType {
     Basic,
     Detailed,
     NavBeacon,
     NavBeaconDetail,
     AutoScan,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum ScanTarget {
+    Star(Star),
+    Body(Body),
 }
 
 #[derive(Deserialize, Debug)]
@@ -51,8 +51,7 @@ pub struct Scan {
     pub star_pos: Coordinate,
     pub system_address: i64,
     #[serde(flatten)]
-    pub body: Body,
-    pub materials: Option<Vec<Material>>,
+    pub target: ScanTarget,
 
     #[serde(flatten)]
     pub other: serde_json::Value,

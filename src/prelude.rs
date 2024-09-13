@@ -7,6 +7,7 @@ pub use crate::ship::JumpCost;
 pub use crate::station::{
     DockingDeniedReason, EconomyShare, PadSize, Service, Station, StationType,
 };
+pub use crate::entry::incremental::exploration::ScanTarget;
 pub use crate::system::{
     Coordinate,
     Economy,
@@ -14,5 +15,6 @@ pub use crate::system::{
     // PowerplayState,
     Security,
     System,
+    Star,
 };
 pub use crate::{Allegiance, Government};

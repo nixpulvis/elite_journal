@@ -26,6 +26,13 @@ pub struct Composition {
     pub metal: f32,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Material {
+    pub name: String,
+    pub percent: f64,
+}
+
 pub struct Node {
     pub body_type: BodyType,
     pub body_id: i16,
@@ -47,10 +54,6 @@ pub struct Body {
     pub distance_from_arrival: Option<f32>,
     pub parents: Vec<Map<String, i16>>,
 
-    // if body_type == star
-    // ...
-
-    // else if body_type == planet/moon
     pub planet_class: String, // TODO: e.g. "Rocky body"
     pub tidal_lock: bool,
     pub landable: bool,
@@ -61,6 +64,7 @@ pub struct Body {
     pub atmosphere_type: String, // TODO: use AtmosphereType enum
     #[serde(deserialize_with = "de::empty_str_is_none")]
     pub volcanism: Option<String>,
+    pub materials: Option<Vec<Material>>,
     /// Body masses in units of earth masses
     #[serde(rename = "MassEM")]
     pub mass: f32,
