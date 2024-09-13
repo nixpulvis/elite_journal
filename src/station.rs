@@ -31,7 +31,7 @@ pub struct Station {
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub struct LandingPads {
     pub large: i16,
@@ -46,7 +46,7 @@ impl fmt::Display for LandingPads {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum StationType {
     AsteroidBase,
     Coriolis,
@@ -85,7 +85,7 @@ pub enum DockingDeniedReason {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum Service {
     #[serde(rename = "autodock")]
     Autodock,
@@ -171,7 +171,7 @@ impl PgHasArrayType for Service {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub struct EconomyShare {
     pub name: Economy,

@@ -14,7 +14,7 @@ pub struct Market {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct Commodity {
     pub name: String,

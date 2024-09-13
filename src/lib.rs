@@ -75,7 +75,7 @@ pub mod de;
 
 /// System and faction's organizational structure
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Government {
     #[serde(alias = "$government_Anarchy;")]
@@ -168,7 +168,7 @@ fn government() {
 
 /// System and faction's alignment to the broader groups
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Allegiance {
     Alliance,

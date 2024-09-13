@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 /// These are just the game's names, they don't really make sense since tritium is an isotope
 /// of hydrogen.
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(all(unix, feature = "with-sqlx"), derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum Fuel {
     /// When we enter for fleet carriers, not the event
     Tritium,
