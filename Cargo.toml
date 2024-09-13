@@ -11,10 +11,8 @@ with-sqlx = ["sqlx/runtime-async-std-native-tls"]
 with-postgis-sqlx = ["with-sqlx", "geozero/with-postgis-sqlx"]
 
 [dependencies]
+chrono     = { version = "0.4", features = ["serde"] }
+geozero    = "^0.9"
 serde      = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-chrono     = { version = "0.4", features = ["serde"] }
-
-[target.'cfg(unix)'.dependencies]
-sqlx    = { version = "^0.6", optional = true }
-geozero = "^0.9"
+sqlx       = { version = "^0.6", optional = true }
