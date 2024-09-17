@@ -1,11 +1,31 @@
 use serde::{Deserialize, Deserializer};
 
+/// Used to describe types which can consider themselves "null"
+///
+/// This is useful when deciding when to save a value. See [`null_is_none`].
 pub trait Nullable {
     fn is_null(&self) -> bool;
 }
 
-// TODO: tests
-pub fn enum_is_null<'d, D, T: Deserialize<'d> + Nullable>(
+/// Map [`Nullable`] types to `Option`
+///
+/// ### Example
+///
+/// ```rust
+/// use serde::Deserialize;
+/// use elite_journal::de::null_is_none;
+/// use elite_journal::system::Security;
+///
+/// #[derive(Deserialize)]
+/// struct Foo {
+///     #[serde(deserialize_with = "null_is_none")]
+///     pub security: Option<Security>,
+/// }
+///
+/// let foo: Foo = serde_json::from_str(r#"{ "security": "Anarchy" }"#).unwrap();
+/// assert_eq!(None, foo.security);
+/// ```
+pub fn null_is_none<'d, D, T: Deserialize<'d> + Nullable>(
     deserializer: D,
 ) -> Result<Option<T>, D::Error>
 where
@@ -23,6 +43,23 @@ where
     }
 }
 
+/// Try to parse a string, returning `None` if it is ""
+///
+/// ### Example
+///
+/// ```rust
+/// use serde::Deserialize;
+/// use elite_journal::de::empty_str_is_none;
+///
+/// #[derive(Deserialize)]
+/// struct Foo {
+///     #[serde(deserialize_with = "empty_str_is_none")]
+///     pub string: Option<String>,
+/// }
+///
+/// let foo: Foo = serde_json::from_str(r#"{ "string": "" }"#).unwrap();
+/// assert_eq!(None, foo.string);
+/// ```
 pub fn empty_str_is_none<'d, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'d>,
@@ -35,10 +72,23 @@ where
     }
 }
 
-//     #[serde(deserialize_with = "de::zero_is_none")]
-//     pub population: Option<u64>,
-
-// TODO: tests
+/// Try to parse a number, returning `None` if it is 0
+///
+/// ### Example
+///
+/// ```rust
+/// use serde::Deserialize;
+/// use elite_journal::de::zero_is_none;
+///
+/// #[derive(Deserialize)]
+/// struct Foo {
+///     #[serde(deserialize_with = "zero_is_none")]
+///     pub number: Option<u64>,
+/// }
+///
+/// let foo: Foo = serde_json::from_str(r#"{ "number": 0 }"#).unwrap();
+/// assert_eq!(None, foo.number);
+/// ```
 pub fn zero_is_none<'d, D, T: Deserialize<'d> + PartialEq<u64>>(
     deserializer: D,
 ) -> Result<Option<T>, D::Error>

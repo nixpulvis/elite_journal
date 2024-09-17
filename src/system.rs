@@ -25,20 +25,20 @@ pub struct System {
     #[serde(deserialize_with = "zero_is_none")]
     pub population: Option<u64>,
     #[serde(rename = "SystemSecurity")]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub security: Option<Security>,
 
     #[serde(rename = "SystemGovernment")]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub government: Option<Government>,
     #[serde(rename = "SystemAllegiance")]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub allegiance: Option<Allegiance>,
     #[serde(rename = "SystemEconomy")]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub economy: Option<Economy>,
     #[serde(rename = "SystemSecondEconomy")]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub second_economy: Option<Economy>,
 
     #[serde(rename = "SystemFaction")]

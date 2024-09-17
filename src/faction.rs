@@ -8,7 +8,7 @@ pub struct Faction {
     pub name: String,
     #[serde(rename = "FactionState")]
     #[serde(default)]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub state: Option<State>,
 }
 
@@ -37,12 +37,12 @@ fn faction() {
 pub struct FactionInfo {
     pub name: String,
     #[serde(rename = "FactionState")]
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub state: Option<State>,
     pub government: Government,
     pub influence: f32,
     pub allegiance: Allegiance,
-    #[serde(deserialize_with = "enum_is_null")]
+    #[serde(deserialize_with = "null_is_none")]
     pub happiness: Option<Happiness>,
     #[serde(default)]
     pub pending_states: Vec<StateTrend>,
