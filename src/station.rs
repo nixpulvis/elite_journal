@@ -86,6 +86,7 @@ pub enum DockingDeniedReason {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", sqlx(no_pg_array))]
 pub enum Service {
     #[serde(rename = "autodock")]
     Autodock,
@@ -172,6 +173,7 @@ impl PgHasArrayType for Service {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+#[cfg_attr(feature = "with-sqlx", sqlx(no_pg_array))]
 #[serde(rename_all = "PascalCase")]
 pub struct EconomyShare {
     pub name: Economy,
