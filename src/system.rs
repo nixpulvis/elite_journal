@@ -332,7 +332,7 @@ impl<'de> Deserialize<'de> for Coordinate {
         #[serde(rename = "Coordinate")]
         struct Helper {
             #[serde(rename = "type")]
-            ty: String,
+            _ty: String,
             coordinates: [f64; 3],
         }
 
