@@ -1,8 +1,8 @@
-use std::fmt;
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "with-sqlx")]
 use sqlx::postgres::{PgHasArrayType, PgTypeInfo};
+use std::fmt;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Station {
@@ -41,7 +41,11 @@ pub struct LandingPads {
 
 impl fmt::Display for LandingPads {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Large: {}, Medium: {}, Small: {}", self.large, self.medium, self.small)
+        write!(
+            f,
+            "Large: {}, Medium: {}, Small: {}",
+            self.large, self.medium, self.small
+        )
     }
 }
 
@@ -64,7 +68,6 @@ impl fmt::Display for StationType {
         write!(f, "{:?}", self)
     }
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum PadSize {

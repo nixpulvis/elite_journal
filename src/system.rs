@@ -430,20 +430,20 @@ pub struct Star {
 
     pub was_discovered: bool,
     pub was_mapped: bool,
-        // "Rings": Array [
-        //     Object {
-        //         "InnerRad": Number(1168900000.0),
-        //         "MassMT": Number(123920000000000.0),
-        //         "Name": String("Spase IA-Y c17-73 A A Belt"),
-        //         "OuterRad": Number(2304600000.0),
-        //         "RingClass": String("eRingClass_Rocky"),
-        //     },
-        //     Object {
-        //         "InnerRad": Number(4919500000.0),
-        //         "MassMT": Number(7495800000000000.0),
-        //         "Name": String("Spase IA-Y c17-73 A B Belt"),
-        //         "OuterRad": Number(314850000000.0),
-        //         "RingClass": String("eRingClass_MetalRich"),
-        //     },
-        // ],
+    // "Rings": Array [
+    //     Object {
+    //         "InnerRad": Number(1168900000.0),
+    //         "MassMT": Number(123920000000000.0),
+    //         "Name": String("Spase IA-Y c17-73 A A Belt"),
+    //         "OuterRad": Number(2304600000.0),
+    //         "RingClass": String("eRingClass_Rocky"),
+    //     },
+    //     Object {
+    //         "InnerRad": Number(4919500000.0),
+    //         "MassMT": Number(7495800000000000.0),
+    //         "Name": String("Spase IA-Y c17-73 A B Belt"),
+    //         "OuterRad": Number(314850000000.0),
+    //         "RingClass": String("eRingClass_MetalRich"),
+    //     },
+    // ],
 }

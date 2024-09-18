@@ -10,7 +10,7 @@ pub struct Market {
     pub station_name: String,
     #[serde(rename = "marketId")]
     pub market_id: i64,
-    pub commodities : Vec<Commodity>,
+    pub commodities: Vec<Commodity>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
