@@ -283,9 +283,7 @@ fn economy() {
     assert!(serde_json::from_str::<Economy>(r#""$economy_None;""#)
         .unwrap()
         .is_null());
-    assert!(serde_json::from_str::<Economy>(r#""None""#)
-        .unwrap()
-        .is_null());
+    assert!(serde_json::from_str::<Economy>(r#""None""#).unwrap().is_null());
     assert!(serde_json::from_str::<Economy>(r#""""#).unwrap().is_null());
 }
 
@@ -315,10 +313,8 @@ impl Serialize for Coordinate {
             coordinates: [&'a f64; 3],
         }
 
-        let helper = Helper {
-            ty: "Point",
-            coordinates: [&self.x, &self.y, &self.z],
-        };
+        let helper =
+            Helper { ty: "Point", coordinates: [&self.x, &self.y, &self.z] };
         helper.serialize(serializer)
     }
 }
@@ -375,7 +371,15 @@ impl GeozeroGeometry for Coordinate {
         processor: &mut P,
     ) -> std::result::Result<(), geozero::error::GeozeroError> {
         processor.point_begin(0)?;
-        processor.coordinate(self.x, self.y, Some(self.z), None, None, None, 0)?;
+        processor.coordinate(
+            self.x,
+            self.y,
+            Some(self.z),
+            None,
+            None,
+            None,
+            0,
+        )?;
         processor.point_end(0)
     }
 
@@ -386,12 +390,11 @@ impl GeozeroGeometry for Coordinate {
 
 #[cfg(feature = "with-postgis-sqlx")]
 impl FromWkb for Coordinate {
-    fn from_wkb<R: Read>(rdr: &mut R, dialect: WkbDialect) -> geozero::error::Result<Self> {
-        let mut pt = Coordinate {
-            x: 0.,
-            y: 0.,
-            z: 0.,
-        };
+    fn from_wkb<R: Read>(
+        rdr: &mut R,
+        dialect: WkbDialect,
+    ) -> geozero::error::Result<Self> {
+        let mut pt = Coordinate { x: 0., y: 0., z: 0. };
         geozero::wkb::process_wkb_type_geom(rdr, &mut pt, dialect)?;
         Ok(pt)
     }

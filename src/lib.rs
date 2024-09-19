@@ -50,7 +50,9 @@ pub mod prelude;
 
 /// Journal and status file entries
 pub mod entry;
-pub use self::entry::{parse_journal_dir, parse_journal_file, parse_status_file, Entry};
+pub use self::entry::{
+    parse_journal_dir, parse_journal_file, parse_status_file, Entry,
+};
 
 /// A star system, located in static 3D space
 pub mod system;
@@ -158,12 +160,8 @@ fn government() {
     assert!(serde_json::from_str::<Government>(r#""$government_None;""#)
         .unwrap()
         .is_null());
-    assert!(serde_json::from_str::<Government>(r#""None""#)
-        .unwrap()
-        .is_null());
-    assert!(serde_json::from_str::<Government>(r#""""#)
-        .unwrap()
-        .is_null());
+    assert!(serde_json::from_str::<Government>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Government>(r#""""#).unwrap().is_null());
 }
 
 /// System and faction's alignment to the broader groups
@@ -225,10 +223,6 @@ fn allegiance() {
     .unwrap();
     assert_eq!(Allegiance::PlayerPilots, player_pilots);
     assert!(Allegiance::None != Allegiance::None);
-    assert!(serde_json::from_str::<Allegiance>(r#""None""#)
-        .unwrap()
-        .is_null());
-    assert!(serde_json::from_str::<Allegiance>(r#""""#)
-        .unwrap()
-        .is_null());
+    assert!(serde_json::from_str::<Allegiance>(r#""None""#).unwrap().is_null());
+    assert!(serde_json::from_str::<Allegiance>(r#""""#).unwrap().is_null());
 }

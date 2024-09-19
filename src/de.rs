@@ -60,7 +60,9 @@ where
 /// let foo: Foo = serde_json::from_str(r#"{ "string": "" }"#).unwrap();
 /// assert_eq!(None, foo.string);
 /// ```
-pub fn empty_str_is_none<'d, D>(deserializer: D) -> Result<Option<String>, D::Error>
+pub fn empty_str_is_none<'d, D>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'d>,
 {

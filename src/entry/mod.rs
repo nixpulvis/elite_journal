@@ -79,7 +79,9 @@ fn entry() {
 // TODO: Our own error types.
 // TODO: add result inside vec too.
 // TODO: This should be an interator, since files are updates as the game runs.
-pub fn parse_journal_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
+pub fn parse_journal_file<P: AsRef<Path>>(
+    path: P,
+) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     Ok(reader
@@ -92,7 +94,9 @@ pub fn parse_journal_file<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, 
 // TODO: Our own error types.
 // TODO: add result inside vec too.
 // TODO: is there a way to stream this too? search for current running log files?
-pub fn parse_journal_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
+pub fn parse_journal_dir<P: AsRef<Path>>(
+    path: P,
+) -> Result<Vec<Entry<Event>>, Box<dyn Error>> {
     let mut entries = Vec::new();
     for entry in read_dir(path)? {
         let entry = entry?;
@@ -107,7 +111,9 @@ pub fn parse_journal_dir<P: AsRef<Path>>(path: P) -> Result<Vec<Entry<Event>>, B
 
 /// Parse a status file entry
 // TODO: Our own error types.
-pub fn parse_status_file<P: AsRef<Path>, E>(path: P) -> Result<Entry<E>, serde_json::Error>
+pub fn parse_status_file<P: AsRef<Path>, E>(
+    path: P,
+) -> Result<Entry<E>, serde_json::Error>
 where
     for<'de> E: Deserialize<'de>,
 {
