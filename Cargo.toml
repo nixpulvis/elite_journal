@@ -15,4 +15,4 @@ serde      = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono     = { version = "0.4", features = ["serde"] }
 sqlx       = { version = "^0.8", optional = true, features = ["postgres"] }
-geozero    = { git = "https://github.com/nixpulvis/geozero", optional = true }
+geozero    = { version = "0.13", optional = true }
