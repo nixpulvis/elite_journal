@@ -1,5 +1,5 @@
 use crate::{de::*, prelude::*};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::BTreeMap as Map;
 use std::fmt;
@@ -287,7 +287,7 @@ fn economy() {
     assert!(serde_json::from_str::<Economy>(r#""""#).unwrap().is_null());
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct Coordinate {
     pub x: f64,
     pub y: f64,
@@ -297,47 +297,6 @@ pub struct Coordinate {
 impl fmt::Display for Coordinate {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({},{},{})", self.x, self.y, self.z)
-    }
-}
-
-impl Serialize for Coordinate {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        #[derive(Serialize)]
-        #[serde(rename = "Coordinate")]
-        struct Helper<'a> {
-            #[serde(rename = "type")]
-            ty: &'a str,
-            coordinates: [&'a f64; 3],
-        }
-
-        let helper =
-            Helper { ty: "Point", coordinates: [&self.x, &self.y, &self.z] };
-        helper.serialize(serializer)
-    }
-}
-
-impl<'de> Deserialize<'de> for Coordinate {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(Deserialize)]
-        #[serde(rename = "Coordinate")]
-        struct Helper {
-            #[serde(rename = "type")]
-            _ty: String,
-            coordinates: [f64; 3],
-        }
-
-        let helper = Helper::deserialize(deserializer)?;
-        Ok(Coordinate {
-            x: helper.coordinates[0],
-            y: helper.coordinates[1],
-            z: helper.coordinates[2],
-        })
     }
 }
 
