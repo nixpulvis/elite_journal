@@ -1,4 +1,4 @@
-pub use crate::body::{Body, BodyType, Signal};
+pub use crate::body::{Star, Body, BodyType, Signal};
 pub use crate::entry::incremental::exploration::ScanTarget;
 pub use crate::faction::{
     Faction, FactionConflict, FactionConflictProgress, FactionConflictType,
@@ -14,7 +14,6 @@ pub use crate::system::{
     // TODO: finish and expose here.
     // PowerplayState,
     Security,
-    Star,
     System,
 };
 pub use crate::{Allegiance, Government};
