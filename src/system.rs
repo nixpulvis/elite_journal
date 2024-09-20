@@ -1,7 +1,6 @@
 use crate::{de::*, prelude::*};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
-use std::collections::BTreeMap as Map;
 use std::fmt;
 
 #[cfg(feature = "with-postgis-sqlx")]
