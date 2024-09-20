@@ -112,7 +112,7 @@ pub struct Star {
     pub absolute_magnitude: f32,
     #[serde(rename = "Age_MY")]
     pub age_my: i32,
-    pub distance_from_arrival_lS: f32,
+    pub distance_from_arrival_ls: f32,
     // TODO: enum?
     pub luminosity: String,
     pub star_class: String,
