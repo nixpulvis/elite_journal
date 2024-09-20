@@ -86,7 +86,8 @@ pub fn parse_journal_file<P: AsRef<Path>>(
     let reader = BufReader::new(file);
     Ok(reader
         .lines()
-        .map(|line| serde_json::from_str(&line.unwrap()).unwrap())
+        .filter_map(|line| line.map(|l| serde_json::from_str(&l)).ok())
+        .flatten()
         .collect())
 }
 
