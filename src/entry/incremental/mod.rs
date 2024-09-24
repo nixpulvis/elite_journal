@@ -210,6 +210,7 @@ pub enum Event {
     SellExplorationData(exploration::SellExplorationData),
     SAASignalsFound(exploration::SAASignalsFound),
     Scan(exploration::Scan),
+    ScanBaryCentre(exploration::ScanBaryCentre),
 
     // TODO: We'll leave this in for sure... but we should test without it, and probably find a way
     // to add a generic JSON value to this.

@@ -59,6 +59,23 @@ pub struct Scan {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
+pub struct ScanBaryCentre {
+    pub star_system: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+    #[serde(rename = "BodyID")]
+    pub body_id: i16,
+    pub semi_major_axis: f32,
+    pub eccentricity: f32,
+    pub periapsis: f32,
+    pub orbital_period: f32,
+    pub orbital_inclination: f32,
+    pub ascending_node: f32,
+    pub mean_anomaly: f32,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
 pub struct SAASignalsFound {
     /// The target body for the surface scan
     pub body: Body,
