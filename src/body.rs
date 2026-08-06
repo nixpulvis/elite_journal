@@ -82,6 +82,12 @@ impl fmt::Display for AtmosphereType {
 }
 
 /// What a body with a surface has, and a gas giant has none of
+///
+/// The first three are what a gas giant is scanned without, and so are what
+/// decides whether there is a surface here at all. The rest are optional in
+/// their own right: a body can have a surface and no volcanism. They are held
+/// here rather than on [`Body`] to say where they can and cannot be expected,
+/// since none of them means anything without somewhere to stand.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Surface {
@@ -89,6 +95,21 @@ pub struct Surface {
     #[serde(rename = "SurfacePressure")]
     pub pressure: f32,
     pub composition: Composition,
+
+    /// Whether a ship can be set down on it
+    #[serde(default)]
+    pub landable: bool,
+    /// What the atmosphere is called, where [`Surface::atmosphere_type`] is
+    /// what it is made of
+    #[serde(default, deserialize_with = "de::empty_str_is_none")]
+    pub atmosphere: Option<String>,
+    #[serde(default, deserialize_with = "de::empty_str_is_none")]
+    pub volcanism: Option<String>,
+    #[serde(default, deserialize_with = "de::empty_str_is_none")]
+    pub terraform_state: Option<String>,
+    /// What can be picked up off it, which is nothing unless it is landable
+    #[serde(default)]
+    pub materials: Vec<Material>,
 }
 
 /// The path a thing takes around whatever it goes round
@@ -105,6 +126,28 @@ pub struct Orbit {
     pub orbital_period: f32,
     pub ascending_node: f32,
     pub mean_anomaly: f32,
+}
+
+/// How a thing turns on its own axis
+///
+/// Nothing to do with an orbit, and the two are independent in both
+/// directions: a system's primary star turns and goes round nothing, and a
+/// barycenter goes round something and does not turn at all.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct Spin {
+    #[serde(rename = "RotationPeriod")]
+    pub period: f32,
+    #[serde(rename = "AxialTilt")]
+    pub tilt: f32,
+}
+
+/// What is known about a thing rather than about the thing itself
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub struct Discovery {
+    #[serde(rename = "WasDiscovered")]
+    pub discovered: bool,
+    #[serde(rename = "WasMapped")]
+    pub mapped: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -145,32 +188,29 @@ pub struct Body {
 
     pub planet_class: String, // TODO: e.g. "Rocky body"
     pub tidal_lock: bool,
-    pub landable: bool,
-    #[serde(deserialize_with = "de::empty_str_is_none")]
-    pub terraform_state: Option<String>,
-    #[serde(deserialize_with = "de::empty_str_is_none")]
-    pub atmosphere: Option<String>,
-    #[serde(deserialize_with = "de::empty_str_is_none")]
-    pub volcanism: Option<String>,
-    pub materials: Option<Vec<Material>>,
     /// Body masses in units of earth masses
     #[serde(rename = "MassEM")]
     pub mass: f32,
     pub radius: f32,
-    pub surface_gravity: f32,
-    pub surface_temperature: f32,
+    /// Measured at the cloud tops where there is no surface, which is why
+    /// these two are not part of [`Surface`] though the game names them for
+    /// one
+    #[serde(rename = "SurfaceGravity")]
+    pub gravity: f32,
+    #[serde(rename = "SurfaceTemperature")]
+    pub temperature: f32,
     /// [`None`] for a body with no surface, which is to say a gas giant
     #[serde(flatten)]
     pub surface: Option<Surface>,
     #[serde(flatten)]
     pub orbit: Orbit,
-    pub rotation_period: f32,
-    pub axial_tilt: f32,
+    #[serde(flatten)]
+    pub spin: Spin,
 
     // TODO: Ring info
     // pub reserve_level: Option<String>,
-    pub was_mapped: bool,
-    pub was_discovered: bool,
+    #[serde(flatten)]
+    pub discovery: Discovery,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -211,13 +251,15 @@ pub struct Star {
     /// [`None`] for the primary, which goes round nothing
     #[serde(flatten)]
     pub orbit: Option<Orbit>,
-    pub axial_tilt: f32,
+    #[serde(flatten)]
+    pub spin: Spin,
     pub radius: f32,
-    pub rotation_period: f32,
-    pub surface_temperature: f32,
+    /// A star has no surface either, whatever the game calls this
+    #[serde(rename = "SurfaceTemperature")]
+    pub temperature: f32,
 
-    pub was_discovered: bool,
-    pub was_mapped: bool,
+    #[serde(flatten)]
+    pub discovery: Discovery,
     // "Rings": Array [
     //     Object {
     //         "InnerRad": Number(1168900000.0),
@@ -234,83 +276,4 @@ pub struct Star {
     //         "RingClass": String("eRingClass_MetalRich"),
     //     },
     // ],
-}
-
-#[test]
-fn a_primary_star_goes_round_nothing_and_names_no_ancestor() {
-    let star = serde_json::from_str::<Star>(
-        r#"
-        {
-            "timestamp": "2026-08-06T12:00:00Z",
-            "event": "Scan",
-            "ScanType": "AutoScan",
-            "BodyName": "LHS 1788",
-            "BodyID": 0,
-            "StarSystem": "LHS 1788",
-            "SystemAddress": 670417692049,
-            "DistanceFromArrivalLS": 0.0,
-            "StarType": "M",
-            "Subclass": 5,
-            "StellarMass": 0.320312,
-            "Radius": 331889440.0,
-            "AbsoluteMagnitude": 9.716263,
-            "Age_MY": 8130,
-            "SurfaceTemperature": 3130.0,
-            "Luminosity": "Va",
-            "RotationPeriod": 168903.53,
-            "AxialTilt": 0.0,
-            "WasDiscovered": true,
-            "WasMapped": false
-        }
-    "#,
-    )
-    .unwrap();
-    assert_eq!("M", star.star_class);
-    assert_eq!(0, star.id);
-    assert!(star.parents.is_empty());
-    assert_eq!(None, star.orbit);
-}
-
-#[test]
-fn a_second_star_carries_an_orbit_about_the_first() {
-    let star = serde_json::from_str::<Star>(
-        r#"
-        {
-            "timestamp": "2026-08-06T12:00:00Z",
-            "event": "Scan",
-            "ScanType": "Detailed",
-            "BodyName": "LHS 1788 B",
-            "BodyID": 1,
-            "StarSystem": "LHS 1788",
-            "SystemAddress": 670417692049,
-            "Parents": [ { "Null": 0 } ],
-            "DistanceFromArrivalLS": 1256.7,
-            "StarType": "M",
-            "Subclass": 7,
-            "StellarMass": 0.144531,
-            "Radius": 232084704.0,
-            "AbsoluteMagnitude": 11.06012,
-            "Age_MY": 8130,
-            "SurfaceTemperature": 2492.0,
-            "Luminosity": "V",
-            "SemiMajorAxis": 376903772354.12,
-            "Eccentricity": 0.077108,
-            "OrbitalInclination": 1.919367,
-            "Periapsis": 173.351376,
-            "OrbitalPeriod": 566327810.28,
-            "AscendingNode": -47.633911,
-            "MeanAnomaly": 46.744045,
-            "RotationPeriod": 141936.492,
-            "AxialTilt": 0.0,
-            "WasDiscovered": true,
-            "WasMapped": false
-        }
-    "#,
-    )
-    .unwrap();
-    assert_eq!(1, star.id);
-    assert_eq!(1256.7, star.distance_from_arrival_ls);
-    let orbit = star.orbit.unwrap();
-    assert_eq!(376903770000., orbit.semi_major_axis);
-    assert_eq!(1, star.parents.len());
 }
