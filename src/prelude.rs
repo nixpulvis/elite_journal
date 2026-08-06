@@ -1,4 +1,4 @@
-pub use crate::body::{Star, Body, BodyType, Signal};
+pub use crate::body::{Body, BodyType, Orbit, Signal, Star};
 pub use crate::entry::incremental::exploration::ScanTarget;
 pub use crate::faction::{
     Faction, FactionConflict, FactionConflictProgress, FactionConflictType,

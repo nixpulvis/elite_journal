@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap as Map;
 use std::fmt;
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub enum BodyType {
     Star,
     Planet,
@@ -13,8 +13,27 @@ pub enum BodyType {
     Station,
     AsteroidCluster,
 
-    // Special case for a body's parent being a barycentre
+    // Special case for a body's parent being a barycenter
     Null,
+
+    #[serde(untagged)]
+    Unknown(String),
+}
+
+impl From<&str> for BodyType {
+    fn from(name: &str) -> Self {
+        serde_json::from_value(serde_json::Value::String(name.to_owned()))
+            .unwrap_or_else(|_| Self::Unknown(name.to_owned()))
+    }
+}
+
+impl fmt::Display for BodyType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Unknown(name) => write!(f, "{}", name),
+            named => write!(f, "{:?}", named),
+        }
+    }
 }
 
 /// What a body's atmosphere is mostly made of
@@ -72,6 +91,22 @@ pub struct Surface {
     pub composition: Composition,
 }
 
+/// The path a thing takes around whatever it goes round
+///
+/// The seven arrive together or not at all: a scan of something that orbits
+/// nothing carries none of them.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "PascalCase")]
+pub struct Orbit {
+    pub semi_major_axis: f32,
+    pub eccentricity: f32,
+    pub orbital_inclination: f32,
+    pub periapsis: f32,
+    pub orbital_period: f32,
+    pub ascending_node: f32,
+    pub mean_anomaly: f32,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Composition {
@@ -80,7 +115,7 @@ pub struct Composition {
     pub metal: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Material {
     pub name: String,
@@ -127,15 +162,10 @@ pub struct Body {
     /// [`None`] for a body with no surface, which is to say a gas giant
     #[serde(flatten)]
     pub surface: Option<Surface>,
-    pub semi_major_axis: f32,
-    pub eccentricity: f32,
-    pub orbital_inclination: f32,
-    pub periapsis: f32,
-    pub orbital_period: f32,
+    #[serde(flatten)]
+    pub orbit: Orbit,
     pub rotation_period: f32,
     pub axial_tilt: f32,
-    pub ascending_node: f32,
-    pub mean_anomaly: f32,
 
     // TODO: Ring info
     // pub reserve_level: Option<String>,
@@ -161,28 +191,29 @@ pub struct Star {
     pub name: String,
     #[serde(rename = "BodyID")]
     pub id: i16,
+    /// Empty for the primary, which is what everything else is measured from
+    #[serde(default)]
     pub parents: Vec<Map<String, i16>>,
 
     pub absolute_magnitude: f32,
     #[serde(rename = "Age_MY")]
     pub age_my: i32,
+    #[serde(rename = "DistanceFromArrivalLS")]
     pub distance_from_arrival_ls: f32,
     // TODO: enum?
     pub luminosity: String,
+    /// What class of star this is, which the game writes as `StarType`
+    #[serde(rename = "StarType")]
     pub star_class: String,
     pub stellar_mass: f32,
     pub subclass: i16,
 
-    pub ascending_node: f32,
+    /// [`None`] for the primary, which goes round nothing
+    #[serde(flatten)]
+    pub orbit: Option<Orbit>,
     pub axial_tilt: f32,
-    pub eccentricity: f32,
-    pub mean_anomaly: f32,
-    pub orbital_inclination: f32,
-    pub orbital_period: f32,
-    pub periapsis: f32,
     pub radius: f32,
     pub rotation_period: f32,
-    pub semi_major_axis: f32,
     pub surface_temperature: f32,
 
     pub was_discovered: bool,
@@ -203,4 +234,83 @@ pub struct Star {
     //         "RingClass": String("eRingClass_MetalRich"),
     //     },
     // ],
+}
+
+#[test]
+fn a_primary_star_goes_round_nothing_and_names_no_ancestor() {
+    let star = serde_json::from_str::<Star>(
+        r#"
+        {
+            "timestamp": "2026-08-06T12:00:00Z",
+            "event": "Scan",
+            "ScanType": "AutoScan",
+            "BodyName": "LHS 1788",
+            "BodyID": 0,
+            "StarSystem": "LHS 1788",
+            "SystemAddress": 670417692049,
+            "DistanceFromArrivalLS": 0.0,
+            "StarType": "M",
+            "Subclass": 5,
+            "StellarMass": 0.320312,
+            "Radius": 331889440.0,
+            "AbsoluteMagnitude": 9.716263,
+            "Age_MY": 8130,
+            "SurfaceTemperature": 3130.0,
+            "Luminosity": "Va",
+            "RotationPeriod": 168903.53,
+            "AxialTilt": 0.0,
+            "WasDiscovered": true,
+            "WasMapped": false
+        }
+    "#,
+    )
+    .unwrap();
+    assert_eq!("M", star.star_class);
+    assert_eq!(0, star.id);
+    assert!(star.parents.is_empty());
+    assert_eq!(None, star.orbit);
+}
+
+#[test]
+fn a_second_star_carries_an_orbit_about_the_first() {
+    let star = serde_json::from_str::<Star>(
+        r#"
+        {
+            "timestamp": "2026-08-06T12:00:00Z",
+            "event": "Scan",
+            "ScanType": "Detailed",
+            "BodyName": "LHS 1788 B",
+            "BodyID": 1,
+            "StarSystem": "LHS 1788",
+            "SystemAddress": 670417692049,
+            "Parents": [ { "Null": 0 } ],
+            "DistanceFromArrivalLS": 1256.7,
+            "StarType": "M",
+            "Subclass": 7,
+            "StellarMass": 0.144531,
+            "Radius": 232084704.0,
+            "AbsoluteMagnitude": 11.06012,
+            "Age_MY": 8130,
+            "SurfaceTemperature": 2492.0,
+            "Luminosity": "V",
+            "SemiMajorAxis": 376903772354.12,
+            "Eccentricity": 0.077108,
+            "OrbitalInclination": 1.919367,
+            "Periapsis": 173.351376,
+            "OrbitalPeriod": 566327810.28,
+            "AscendingNode": -47.633911,
+            "MeanAnomaly": 46.744045,
+            "RotationPeriod": 141936.492,
+            "AxialTilt": 0.0,
+            "WasDiscovered": true,
+            "WasMapped": false
+        }
+    "#,
+    )
+    .unwrap();
+    assert_eq!(1, star.id);
+    assert_eq!(1256.7, star.distance_from_arrival_ls);
+    let orbit = star.orbit.unwrap();
+    assert_eq!(376903770000., orbit.semi_major_axis);
+    assert_eq!(1, star.parents.len());
 }
