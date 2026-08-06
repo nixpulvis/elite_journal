@@ -1,6 +1,7 @@
 use crate::de;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap as Map;
+use std::fmt;
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug)]
 pub enum BodyType {
@@ -16,9 +17,62 @@ pub enum BodyType {
     Null,
 }
 
-// TODO: enum AtmosphereType {}
+/// What a body's atmosphere is mostly made of
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub enum AtmosphereType {
+    Ammonia,
+    AmmoniaOxygen,
+    AmmoniaRich,
+    Argon,
+    ArgonRich,
+    CarbonDioxide,
+    CarbonDioxideRich,
+    EarthLike,
+    Helium,
+    MetallicVapour,
+    Methane,
+    MethaneRich,
+    Neon,
+    NeonRich,
+    Nitrogen,
+    Oxygen,
+    SilicateVapour,
+    SulphurDioxide,
+    Water,
+    WaterRich,
+    None,
 
-#[derive(Serialize, Deserialize, Debug)]
+    #[serde(untagged)]
+    Unknown(String),
+}
+
+impl From<&str> for AtmosphereType {
+    fn from(name: &str) -> Self {
+        serde_json::from_value(serde_json::Value::String(name.to_owned()))
+            .unwrap_or_else(|_| Self::Unknown(name.to_owned()))
+    }
+}
+
+impl fmt::Display for AtmosphereType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Unknown(name) => write!(f, "{}", name),
+            named => write!(f, "{:?}", named),
+        }
+    }
+}
+
+/// What a body with a surface has, and a gas giant has none of
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "PascalCase")]
+pub struct Surface {
+    pub atmosphere_type: AtmosphereType,
+    #[serde(rename = "SurfacePressure")]
+    pub pressure: f32,
+    pub composition: Composition,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Composition {
     pub ice: f32,
@@ -61,7 +115,6 @@ pub struct Body {
     pub terraform_state: Option<String>,
     #[serde(deserialize_with = "de::empty_str_is_none")]
     pub atmosphere: Option<String>,
-    pub atmosphere_type: String, // TODO: use AtmosphereType enum
     #[serde(deserialize_with = "de::empty_str_is_none")]
     pub volcanism: Option<String>,
     pub materials: Option<Vec<Material>>,
@@ -71,8 +124,9 @@ pub struct Body {
     pub radius: f32,
     pub surface_gravity: f32,
     pub surface_temperature: f32,
-    pub surface_pressure: f32,
-    pub composition: Composition,
+    /// [`None`] for a body with no surface, which is to say a gas giant
+    #[serde(flatten)]
+    pub surface: Option<Surface>,
     pub semi_major_axis: f32,
     pub eccentricity: f32,
     pub orbital_inclination: f32,
