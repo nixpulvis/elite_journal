@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -55,6 +56,99 @@ pub struct Scan {
 
     #[serde(flatten)]
     pub other: serde_json::Value,
+}
+
+/// Signals read off a body from orbit, which the honk finds
+///
+/// The same kinds and counts [`SAASignalsFound`] reports, seen from further
+/// off: the honk finds them, a surface scan is what maps them. Either may
+/// arrive first, and either may arrive for a body nothing has scanned.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct FssBodySignals {
+    #[serde(rename = "BodyName")]
+    pub body_name: Option<String>,
+    #[serde(rename = "BodyID")]
+    pub body_id: i16,
+
+    pub star_system: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
+    pub signals: Vec<Signal>,
+}
+
+/// Everything hanging in a system that is not a body
+///
+/// Stations, megaships, installations, beacons, and the unidentified sources
+/// that come and go. Sent in batches: the game emits one of these per signal
+/// and EDDN gathers a system's worth into a single message, so the outer
+/// timestamp is the first signal's and each signal carries its own.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct FssSignalDiscovered {
+    pub star_system: Option<String>,
+    pub star_pos: Option<Coordinate>,
+    pub system_address: i64,
+
+    #[serde(rename = "signals")]
+    pub signals: Vec<SystemSignal>,
+}
+
+/// One signal out of an [`FssSignalDiscovered`] batch
+///
+/// Only the name is certain. What kind of thing it is, who spawned it and how
+/// dangerous it is are all told where the game bothered to say, which depends
+/// on what the signal is.
+///
+/// How long it has left is never told. The journal carries it and the schema
+/// disallows it, so a signal that has since despawned is indistinguishable
+/// from one still there apart from how long ago this was sent.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct SystemSignal {
+    pub timestamp: DateTime<Utc>,
+    pub signal_name: String,
+    pub signal_type: Option<String>,
+    /// Permanent where [`Some(true)`], which is as near an expiry as there is
+    pub is_station: Option<bool>,
+    #[serde(rename = "USSType")]
+    pub uss_type: Option<String>,
+    pub spawning_state: Option<String>,
+    pub spawning_faction: Option<String>,
+    pub spawning_power: Option<String>,
+    pub opposing_power: Option<String>,
+    pub threat_level: Option<i32>,
+}
+
+/// A codex sighting: a kind of thing, found somewhere
+///
+/// Names the system `System`, which no other event does. Whether the sender
+/// was first to it is not here and cannot be -- the schema disallows it as
+/// personal data -- so this says a thing was found, not that it was
+/// discovered.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct CodexEntry {
+    #[serde(rename = "System")]
+    pub system_name: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
+    #[serde(rename = "EntryID")]
+    pub entry_id: i64,
+    /// Not required by the schema, though always sent in practice
+    pub name: Option<String>,
+    pub category: Option<String>,
+    pub sub_category: Option<String>,
+    pub region: Option<String>,
+
+    #[serde(rename = "BodyID")]
+    pub body_id: Option<i16>,
+    pub body_name: Option<String>,
+    pub nearest_destination: Option<String>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
 }
 
 /// The honk: what a system holds, counted before any of it is identified

@@ -24,7 +24,6 @@ use serde::Deserialize;
 // "CarrierTradeOrder"
 // "ChangeCrewRole"
 // "CockpitBreached"
-// "CodexEntry"
 // "CollectCargo"
 // "Commander"
 // "CommitCrime"
@@ -58,7 +57,6 @@ use serde::Deserialize;
 // "Friends"
 // "FSDJump"
 // "FSDTarget"
-// "FSSSignalDiscovered"
 // "FuelScoop"
 // "HeatDamage"
 // "HeatWarning"
@@ -215,6 +213,13 @@ pub enum Event {
     #[serde(rename = "FSSAllBodiesFound")]
     FssAllBodiesFound(exploration::FssAllBodiesFound),
     NavBeaconScan(exploration::NavBeaconScan),
+
+    /// What is in a system besides its bodies, and what is written on them
+    #[serde(rename = "FSSBodySignals")]
+    FssBodySignals(exploration::FssBodySignals),
+    #[serde(rename = "FSSSignalDiscovered")]
+    FssSignalDiscovered(exploration::FssSignalDiscovered),
+    CodexEntry(exploration::CodexEntry),
 
     // TODO: We'll leave this in for sure... but we should test without it, and probably find a way
     // to add a generic JSON value to this.
