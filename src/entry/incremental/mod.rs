@@ -2,7 +2,6 @@ use crate::entry::route::NavRoute;
 use serde::Deserialize;
 
 // "AfmuRepairs"
-// "ApproachSettlement"
 // "Bounty"
 // "BuyAmmo"
 // "BuyDrones"
@@ -191,6 +190,7 @@ pub enum Event {
     Liftoff(travel::Liftoff),
     LeaveBody(travel::LeaveBody),
     ApproachBody(travel::ApproachBody),
+    ApproachSettlement(travel::ApproachSettlement),
 
     #[serde(rename = "FSDTarget")]
     FsdTarget(travel::FsdTarget),

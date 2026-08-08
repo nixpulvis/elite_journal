@@ -1,6 +1,45 @@
 use crate::prelude::*;
 use serde::Deserialize;
 
+/// Coming up on a settlement, which is a station on a planet's surface
+///
+/// The only station-bearing event that says where on the body the station is.
+/// Everything else in orbit needs no such thing, and a settlement is not
+/// findable without it.
+///
+/// Names the settlement `Name` rather than `StationName`, which is why the
+/// station cannot simply be flattened in the way [`Docked`] and [`Location`]
+/// flatten theirs.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct ApproachSettlement {
+    pub name: String,
+    #[serde(rename = "MarketID")]
+    pub market_id: Option<i64>,
+
+    #[serde(rename = "StarSystem")]
+    pub system_name: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
+    #[serde(rename = "BodyID")]
+    pub body_id: i16,
+    pub body_name: String,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
+
+    #[serde(rename = "StationFaction")]
+    pub faction: Option<Faction>,
+    #[serde(rename = "StationGovernment")]
+    pub government: Option<Government>,
+    #[serde(rename = "StationAllegiance")]
+    pub allegiance: Option<Allegiance>,
+    #[serde(rename = "StationServices")]
+    pub services: Option<Vec<Service>>,
+    #[serde(rename = "StationEconomies")]
+    pub economies: Option<Vec<EconomyShare>>,
+}
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct ApproachBody {
