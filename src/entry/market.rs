@@ -138,3 +138,161 @@ pub struct BlackMarket {
     pub sell_price: i32,
     pub prohibited: bool,
 }
+
+/// The market schemas, read from the shape EDDN sends
+///
+/// None of these carries an `event`, so nothing about the payload says what it
+/// is; the `$schemaRef` above it is the only thing that does. They are written
+/// out here so that a rename that stops one being read fails here rather than
+/// silently going quiet on the wire.
+///
+/// <https://github.com/EDCD/EDDN/tree/master/schemas>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::entry::Entry;
+
+    /// `outfitting/3`, which prices each module
+    #[test]
+    fn outfitting_with_prices() {
+        let entry: Entry<Outfitting> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "systemName": "Sol",
+                "stationName": "Abraham Lincoln",
+                "marketId": 128016384,
+                "modules": [
+                    {
+                        "id": 128064258,
+                        "Name": "Int_Engine_Size3_Class5_Fast",
+                        "BuyPrice": 5103953,
+                        "BuyMercCoinsPrice": 0
+                    }
+                ]
+            }"#,
+        )
+        .expect("outfitting/3 should parse");
+
+        let module = &entry.event.modules[0];
+        assert_eq!(module.name(), "Int_Engine_Size3_Class5_Fast");
+        assert_eq!(module.buy_price(), Some(5103953));
+        assert_eq!(module.merc_coins_price(), Some(0));
+    }
+
+    /// `outfitting/2`, which sends the name alone
+    ///
+    /// Still a live schema, still sent, and the only difference between the
+    /// two versions. A module read this way says a station sells it and
+    /// nothing about what it costs.
+    #[test]
+    fn outfitting_without_prices() {
+        let entry: Entry<Outfitting> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "systemName": "Sol",
+                "stationName": "Abraham Lincoln",
+                "marketId": 128016384,
+                "modules": [
+                    "Int_Engine_Size3_Class5_Fast",
+                    "Hpt_ChaffLauncher_Tiny"
+                ]
+            }"#,
+        )
+        .expect("outfitting/2 should parse");
+
+        assert_eq!(entry.event.modules.len(), 2);
+        assert_eq!(
+            entry.event.modules[0].name(),
+            "Int_Engine_Size3_Class5_Fast"
+        );
+        assert_eq!(entry.event.modules[0].buy_price(), None);
+        assert_eq!(entry.event.modules[0].merc_coins_price(), None);
+    }
+
+    #[test]
+    fn a_shipyard_sends_names_only() {
+        let entry: Entry<Shipyard> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "systemName": "Sol",
+                "stationName": "Abraham Lincoln",
+                "marketId": 128016384,
+                "ships": ["SideWinder", "Federation_Corvette"],
+                "allowCobraMkIV": false
+            }"#,
+        )
+        .expect("shipyard/2 should parse");
+
+        assert_eq!(entry.event.ships, ["SideWinder", "Federation_Corvette"]);
+        assert_eq!(entry.event.allow_cobra_mk_iv, Some(false));
+    }
+
+    /// One commodity at a time, and the market id the schema does not demand
+    #[test]
+    fn a_black_market_sale() {
+        let entry: Entry<BlackMarket> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "systemName": "Sol",
+                "stationName": "Abraham Lincoln",
+                "marketId": 128016384,
+                "name": "Gold",
+                "sellPrice": 9432,
+                "prohibited": false
+            }"#,
+        )
+        .expect("blackmarket/1 should parse");
+
+        assert_eq!(entry.event.name, "Gold");
+        assert_eq!(entry.event.sell_price, 9432);
+        assert_eq!(entry.event.market_id, Some(128016384));
+    }
+
+    /// A sale with no market id still reads, and cannot be placed
+    #[test]
+    fn a_black_market_sale_without_a_market() {
+        let entry: Entry<BlackMarket> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "systemName": "Sol",
+                "stationName": "Abraham Lincoln",
+                "name": "Gold",
+                "sellPrice": 9432,
+                "prohibited": true
+            }"#,
+        )
+        .expect("blackmarket/1 without a market id should parse");
+
+        assert_eq!(entry.event.market_id, None);
+        assert!(entry.event.prohibited);
+    }
+
+    /// The commodity schema, which was read before any of the others
+    #[test]
+    fn a_commodity_market() {
+        let entry: Entry<Market> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "systemName": "Sol",
+                "stationName": "Abraham Lincoln",
+                "marketId": 128016384,
+                "commodities": [
+                    {
+                        "name": "gold",
+                        "meanPrice": 9411,
+                        "buyPrice": 0,
+                        "sellPrice": 9432,
+                        "demand": 1148,
+                        "demandBracket": 2,
+                        "stock": 0,
+                        "stockBracket": 0
+                    }
+                ]
+            }"#,
+        )
+        .expect("commodity/3 should parse");
+
+        assert_eq!(entry.event.commodities[0].name, "gold");
+        assert_eq!(entry.event.commodities[0].sell_price, 9432);
+    }
+}
