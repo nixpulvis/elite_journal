@@ -201,8 +201,8 @@ pub enum Event {
     FsdTarget(travel::FsdTarget),
     #[serde(rename = "FSDJump")]
     FsdJump(travel::FsdJump),
-    // TODO: next
-    // CarrierJump(travel::CarrierJump),
+    CarrierJump(travel::CarrierJump),
+
     /// Signals an update to the [`NavRoute.json`][crate::entry::route] file
     NavRoute(NavRoute),
 

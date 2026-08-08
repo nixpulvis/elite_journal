@@ -77,8 +77,22 @@ pub struct ScanBaryCentre {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct SAASignalsFound {
-    /// The target body for the surface scan
-    pub body: Body,
+    /// The body the surface scan was of, named and numbered
+    ///
+    /// Not a [`Body`]. A scan of a body says what it is made of and how it
+    /// moves; this says which body signals were found on and nothing else
+    /// about it, so there is no body here to describe. Asking for one is
+    /// what stopped this event from being read at all: every message failed
+    /// on a missing `Body` field that the game has never sent.
+    #[serde(rename = "BodyName")]
+    pub body_name: String,
+    #[serde(rename = "BodyID")]
+    pub body_id: i16,
+
+    pub star_system: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
     /// Detected nearby signals
     pub signals: Vec<Signal>,
 }

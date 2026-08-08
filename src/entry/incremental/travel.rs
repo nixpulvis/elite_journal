@@ -185,3 +185,26 @@ pub struct Location {
     #[serde(flatten)]
     pub station: Option<Station>,
 }
+
+/// Arriving in a system aboard a fleet carrier
+///
+/// A carrier jump is a system visit and says everything about the system that
+/// arriving under your own power does: where it is, who holds it, what it
+/// trades in, which factions are at each other's throats. The carrier is a
+/// station and the commander is docked at it the whole way, so a station comes
+/// with it too.
+///
+/// Told apart from [`Location`] only by `docked`, which the game began sending
+/// partway through the event's life and which nothing here needs. A carrier
+/// jump that predates it is still a carrier jump.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct CarrierJump {
+    #[serde(flatten)]
+    pub system: System,
+    #[serde(flatten)]
+    pub body: Option<Body>,
+    pub docked: Option<bool>,
+    #[serde(flatten)]
+    pub station: Option<Station>,
+}
