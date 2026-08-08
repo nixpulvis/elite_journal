@@ -50,11 +50,18 @@ pub struct ApproachBody {
     pub name: String,
 }
 
+/// The market a docking event is about
+///
+/// `MarketID`, and PascalCase makes `MarketId`, which is a different field
+/// and is never sent. Every docking event below named it that way and so
+/// read none of the messages it was written for; [`Docked`] escaped only
+/// because it flattens a [`Station`], where the name is spelled out by hand.
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct DockingRequested {
     pub station_name: String,
-    pub station_type: String,
+    pub station_type: Option<String>,
+    #[serde(rename = "MarketID")]
     pub market_id: u64,
     pub landing_pads: PadSize,
 }
@@ -63,16 +70,20 @@ pub struct DockingRequested {
 #[serde(rename_all = "PascalCase")]
 pub struct DockingGranted {
     pub station_name: String,
-    pub station_type: String,
+    /// Optional in the schema, and sent by most but not all
+    pub station_type: Option<String>,
+    #[serde(rename = "MarketID")]
     pub market_id: u64,
-    pub landing_pad: u8,
+    pub landing_pad: Option<u8>,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct DockingDenied {
     pub station_name: String,
-    pub station_type: String,
+    /// Optional in the schema, and sent by most but not all
+    pub station_type: Option<String>,
+    #[serde(rename = "MarketID")]
     pub market_id: u64,
     pub reason: DockingDeniedReason,
 }
@@ -81,7 +92,8 @@ pub struct DockingDenied {
 #[serde(rename_all = "PascalCase")]
 pub struct DockingCancelled {
     pub station_name: String,
-    pub station_type: String,
+    pub station_type: Option<String>,
+    #[serde(rename = "MarketID")]
     pub market_id: u64,
 }
 
@@ -89,7 +101,8 @@ pub struct DockingCancelled {
 #[serde(rename_all = "PascalCase")]
 pub struct DockingTimeout {
     pub station_name: String,
-    pub station_type: String,
+    pub station_type: Option<String>,
+    #[serde(rename = "MarketID")]
     pub market_id: u64,
 }
 
@@ -109,6 +122,7 @@ pub struct Docked {
 #[serde(rename_all = "PascalCase")]
 pub struct Undocked {
     pub station_name: String,
+    #[serde(rename = "MarketID")]
     pub market_id: u64,
 }
 
