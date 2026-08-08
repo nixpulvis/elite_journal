@@ -107,6 +107,11 @@ pub struct FssSignalDiscovered {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct SystemSignal {
+    /// Spelled lowercase, alone among the fields of this event
+    ///
+    /// Which is what the schema says, and the rest of the event is
+    /// PascalCase, so it has to be held out of the renaming by hand.
+    #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
     pub signal_name: String,
     pub signal_type: Option<String>,
