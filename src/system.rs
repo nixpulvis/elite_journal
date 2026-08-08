@@ -21,22 +21,28 @@ pub struct System {
     #[serde(rename = "StarSystem")]
     pub name: String,
 
+    #[serde(default)]
     #[serde(deserialize_with = "zero_is_none")]
     pub population: Option<u64>,
     #[serde(rename = "SystemSecurity")]
+    #[serde(default)]
     #[serde(deserialize_with = "null_is_none")]
     pub security: Option<Security>,
 
     #[serde(rename = "SystemGovernment")]
+    #[serde(default)]
     #[serde(deserialize_with = "null_is_none")]
     pub government: Option<Government>,
     #[serde(rename = "SystemAllegiance")]
+    #[serde(default)]
     #[serde(deserialize_with = "null_is_none")]
     pub allegiance: Option<Allegiance>,
     #[serde(rename = "SystemEconomy")]
+    #[serde(default)]
     #[serde(deserialize_with = "null_is_none")]
     pub economy: Option<Economy>,
     #[serde(rename = "SystemSecondEconomy")]
+    #[serde(default)]
     #[serde(deserialize_with = "null_is_none")]
     pub second_economy: Option<Economy>,
 
