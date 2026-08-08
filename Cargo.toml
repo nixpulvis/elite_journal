@@ -8,11 +8,10 @@ edition = "2018"
 
 [features]
 with-sqlx = ["sqlx/runtime-async-std-native-tls"]
-# `with-wkb` rather than geozero's own `with-postgis-sqlx`, which is the whole
-# of what a coordinate is read and written through here: the well known binary
-# a geometry column holds. geozero's postgis integration is its own `Encode`
-# and `Decode` against sqlx 0.7, and asking for it drags a second sqlx into
-# every build alongside the 0.8 this crate speaks.
+# `with-wkb` rather than geozero's own `with-postgis-sqlx`, that being the
+# whole of what a coordinate is read and written through here: the well known
+# binary a geometry column holds. geozero's postgis integration is an `Encode`
+# and a `Decode` of its own, which nothing in this crate calls.
 with-postgis-sqlx = ["with-sqlx", "geozero/with-wkb"]
 
 [dependencies]
@@ -20,4 +19,4 @@ serde      = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono     = { version = "0.4", features = ["serde"] }
 sqlx       = { version = "^0.8", optional = true, features = ["postgres"] }
-geozero    = { version = "0.13", optional = true }
+geozero    = { version = "0.15", optional = true }
