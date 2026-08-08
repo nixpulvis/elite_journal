@@ -57,6 +57,66 @@ pub struct Scan {
     pub other: serde_json::Value,
 }
 
+/// The honk: what a system holds, counted before any of it is identified
+///
+/// The first thing done on arriving somewhere, and the only event that says
+/// how much there is to find. Everything else describes what has been found.
+///
+/// Names the system `SystemName` where nearly every other event calls it
+/// `StarSystem`. It is not a mistake in the schema, and a struct that assumes
+/// otherwise reads nothing.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct FssDiscoveryScan {
+    #[serde(rename = "SystemName")]
+    pub system_name: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
+    /// Bodies in the system: stars, planets, moons
+    pub body_count: i32,
+    /// Everything else the honk finds, being belts and rings
+    ///
+    /// Never appears in a body table, here or in the game's own, because
+    /// none of it is a body.
+    pub non_body_count: i32,
+}
+
+/// Every body in a system found, which fixes the count as certain
+///
+/// Says the same thing [`FssDiscoveryScan`] does and says it having finished:
+/// the honk's count is what the sensors made of the system on arrival, this
+/// is the tally once every one of them has been resolved.
+///
+/// Names the system `SystemName`, as [`FssDiscoveryScan`] does.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct FssAllBodiesFound {
+    #[serde(rename = "SystemName")]
+    pub system_name: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
+    /// Bodies in the system, all of them now accounted for
+    pub count: i32,
+}
+
+/// A nav beacon read, which hands over the system's body count for free
+///
+/// The count is the same quantity [`FssDiscoveryScan`] reports, arrived at by
+/// reading a beacon rather than by honking. Unlike those two this event names
+/// the system `StarSystem`, as most events do.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct NavBeaconScan {
+    pub star_system: String,
+    pub star_pos: Coordinate,
+    pub system_address: i64,
+
+    /// Bodies in the system
+    pub num_bodies: i32,
+}
+
 /// The center of mass a close pair goes round, scanned as a body in its own
 /// right
 ///

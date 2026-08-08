@@ -58,8 +58,6 @@ use serde::Deserialize;
 // "Friends"
 // "FSDJump"
 // "FSDTarget"
-// "FSSAllBodiesFound"
-// "FSSDiscoveryScan"
 // "FSSSignalDiscovered"
 // "FuelScoop"
 // "HeatDamage"
@@ -100,7 +98,6 @@ use serde::Deserialize;
 // "ModuleSwap"
 // "MultiSellExplorationData"
 // "Music"
-// "NavBeaconScan"
 // "NavRoute"
 // "Outfitting"
 // "Passengers"
@@ -211,6 +208,13 @@ pub enum Event {
     SAASignalsFound(exploration::SAASignalsFound),
     Scan(exploration::Scan),
     ScanBaryCentre(exploration::ScanBaryCentre),
+
+    /// How much there is in a system, as against what has been found in it
+    #[serde(rename = "FSSDiscoveryScan")]
+    FssDiscoveryScan(exploration::FssDiscoveryScan),
+    #[serde(rename = "FSSAllBodiesFound")]
+    FssAllBodiesFound(exploration::FssAllBodiesFound),
+    NavBeaconScan(exploration::NavBeaconScan),
 
     // TODO: We'll leave this in for sure... but we should test without it, and probably find a way
     // to add a generic JSON value to this.
