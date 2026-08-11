@@ -156,7 +156,6 @@ use serde::Deserialize;
 // "TechnologyBroker"
 // "Touchdown"
 // "UnderAttack"
-// "Undocked"
 // "USSDrop"
 // "VehicleSwitch"
 // "WingAdd"
@@ -186,6 +185,7 @@ pub enum Event {
     DockingDenied(travel::DockingDenied),
     DockingCancelled(travel::DockingCancelled),
     DockingTimeout(travel::DockingTimeout),
+    Undocked(travel::Undocked),
 
     Liftoff(travel::Liftoff),
     LeaveBody(travel::LeaveBody),
@@ -590,5 +590,89 @@ mod tests {
             ),
             Event::Other
         ));
+    }
+
+    /// The docking events that never reach EDDN, read as journal lines
+    ///
+    /// EDDN has schemas for two of the six -- granted and denied -- so the
+    /// other four arrive only in a commander's own `Journal.<stamp>.log`,
+    /// which is what `parse_journal_file` reads. That is the whole of the
+    /// difference: they are the same events written by the same game, and
+    /// there is nothing about them that cannot be read here.
+    ///
+    /// All four were failing on `MarketId`, a field the game does not send.
+    #[test]
+    fn the_docking_events_that_only_reach_a_journal_file() {
+        let requested = assert_read(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "event": "DockingRequested",
+                "MarketID": 3226577920,
+                "StationName": "Ray Gateway",
+                "StationType": "Coriolis",
+                "LandingPads": { "Small": 19, "Medium": 21, "Large": 9 }
+            }"#,
+        );
+
+        let Event::DockingRequested(requested) = requested else {
+            panic!("not a docking request")
+        };
+        assert_eq!(requested.market_id, 3226577920);
+
+        // A count per size, which is what the game sends. Asking for one
+        // size instead read none of these at all.
+        let pads = requested.landing_pads.expect("pads should read");
+        assert_eq!(pads.small, 19);
+        assert_eq!(pads.medium, 21);
+        assert_eq!(pads.large, 9);
+
+        assert!(matches!(
+            assert_read(
+                r#"{
+                    "timestamp": "2026-08-08T12:00:00Z",
+                    "event": "DockingCancelled",
+                    "MarketID": 3226577920,
+                    "StationName": "Ray Gateway",
+                    "StationType": "Coriolis"
+                }"#
+            ),
+            Event::DockingCancelled(_)
+        ));
+
+        assert!(matches!(
+            assert_read(
+                r#"{
+                    "timestamp": "2026-08-08T12:00:00Z",
+                    "event": "DockingTimeout",
+                    "MarketID": 3226577920,
+                    "StationName": "Ray Gateway",
+                    "StationType": "Coriolis"
+                }"#
+            ),
+            Event::DockingTimeout(_)
+        ));
+    }
+
+    /// Undocking, which had a struct and no way to reach it
+    ///
+    /// `Undocked` was written and never added to this enum, so every one of
+    /// them fell through to `Other` no matter what the struct said.
+    #[test]
+    fn undocking_is_read() {
+        let Event::Undocked(undocked) = assert_read(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "event": "Undocked",
+                "StationName": "Ray Gateway",
+                "MarketID": 3226577920,
+                "Taxi": false,
+                "Multicrew": false
+            }"#,
+        ) else {
+            panic!("not an undocking")
+        };
+
+        assert_eq!(undocked.station_name, "Ray Gateway");
+        assert_eq!(undocked.market_id, 3226577920);
     }
 }

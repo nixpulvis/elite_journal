@@ -63,7 +63,13 @@ pub struct DockingRequested {
     pub station_type: Option<String>,
     #[serde(rename = "MarketID")]
     pub market_id: u64,
-    pub landing_pads: PadSize,
+    /// How many pads of each size the station has
+    ///
+    /// A count per size, not one size. `PadSize` was what this asked for and
+    /// the game has never sent it: the field is `{"Small":19,"Medium":21,
+    /// "Large":9}`, which is what [`LandingPads`] is. Optional because the
+    /// game did not always send it at all.
+    pub landing_pads: Option<LandingPads>,
 }
 
 #[derive(Deserialize, Debug)]

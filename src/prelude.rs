@@ -6,7 +6,8 @@ pub use crate::faction::{
 };
 pub use crate::ship::JumpCost;
 pub use crate::station::{
-    DockingDeniedReason, EconomyShare, PadSize, Service, Station, StationType,
+    DockingDeniedReason, EconomyShare, LandingPads, PadSize, Service, Station,
+    StationType,
 };
 pub use crate::system::{
     Coordinate,
