@@ -967,6 +967,26 @@ mod tests {
 
         assert_eq!(settlement.name, "$Ancient:#index=3;");
         assert!(settlement.faction.is_none());
+
+        // The same claim spelled longer.
+        let Event::ApproachSettlement(named_nothing) = assert_read(
+            r#"{
+                "timestamp": "2026-08-11T19:39:29Z",
+                "event": "ApproachSettlement",
+                "StarSystem": "Synuefe NL-N c23-4",
+                "StarPos": [860.125, -124.59375, -61.0625],
+                "StationFaction": { "Name": null },
+                "SystemAddress": 1184840454858,
+                "Name": "$Ancient:#index=3;",
+                "BodyID": 18,
+                "BodyName": "Synuefe NL-N c23-4 B 3",
+                "Latitude": 5.614992,
+                "Longitude": -148.089981
+            }"#,
+        ) else {
+            panic!("not a settlement")
+        };
+        assert!(named_nothing.faction.is_none());
     }
 
     /// A scan answering to none of the four kinds is reported, not stored

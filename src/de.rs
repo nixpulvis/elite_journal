@@ -106,12 +106,13 @@ where
     Ok(None)
 }
 
-/// Read a value, returning `None` if it is an empty object
+/// Read a value, returning `None` if it is an object saying nothing
 ///
-/// The game writes `{}` where a thing is absent as readily as it writes
-/// nothing at all. A settlement approached in the black has a
-/// `StationFaction` of `{}`, and read as a faction that is one short of its
-/// name.
+/// Which is one with no fields, or one whose every field is null. The game
+/// writes an absent thing either way as readily as it leaves the key out
+/// altogether: a settlement approached in the black has a `StationFaction` of
+/// `{}`, and a faction with a null name is the same claim spelled longer. Read
+/// as a faction, both are one short of a name.
 ///
 /// ### Example
 ///
@@ -129,6 +130,10 @@ where
 ///
 /// let foo: Foo = serde_json::from_str(r#"{ "faction": {} }"#).unwrap();
 /// assert!(foo.faction.is_none());
+///
+/// let bar: Foo =
+///     serde_json::from_str(r#"{ "faction": { "Name": null } }"#).unwrap();
+/// assert!(bar.faction.is_none());
 /// ```
 pub fn empty_map_is_none<'d, D, T: Deserialize<'d>>(
     deserializer: D,
@@ -137,7 +142,9 @@ where
     D: Deserializer<'d>,
 {
     match Option::<serde_json::Value>::deserialize(deserializer)? {
-        Some(serde_json::Value::Object(fields)) if fields.is_empty() => {
+        Some(serde_json::Value::Object(fields))
+            if fields.values().all(serde_json::Value::is_null) =>
+        {
             Ok(None)
         }
         Some(value) => {
