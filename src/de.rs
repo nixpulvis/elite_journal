@@ -105,3 +105,44 @@ where
     }
     Ok(None)
 }
+
+/// Read a value, returning `None` if it is an empty object
+///
+/// The game writes `{}` where a thing is absent as readily as it writes
+/// nothing at all. A settlement approached in the black has a
+/// `StationFaction` of `{}`, and read as a faction that is one short of its
+/// name.
+///
+/// ### Example
+///
+/// ```rust
+/// use serde::Deserialize;
+/// use elite_journal::de::empty_map_is_none;
+/// use elite_journal::faction::Faction;
+///
+/// #[derive(Deserialize)]
+/// struct Foo {
+///     #[serde(default)]
+///     #[serde(deserialize_with = "empty_map_is_none")]
+///     pub faction: Option<Faction>,
+/// }
+///
+/// let foo: Foo = serde_json::from_str(r#"{ "faction": {} }"#).unwrap();
+/// assert!(foo.faction.is_none());
+/// ```
+pub fn empty_map_is_none<'d, D, T: Deserialize<'d>>(
+    deserializer: D,
+) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'d>,
+{
+    match Option::<serde_json::Value>::deserialize(deserializer)? {
+        Some(serde_json::Value::Object(fields)) if fields.is_empty() => {
+            Ok(None)
+        }
+        Some(value) => {
+            T::deserialize(value).map(Some).map_err(serde::de::Error::custom)
+        }
+        None => Ok(None),
+    }
+}

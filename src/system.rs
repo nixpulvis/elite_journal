@@ -47,6 +47,8 @@ pub struct System {
     pub second_economy: Option<Economy>,
 
     #[serde(rename = "SystemFaction")]
+    #[serde(default)]
+    #[serde(deserialize_with = "crate::de::empty_map_is_none")]
     pub controlling_faction: Option<Faction>,
     #[serde(default)]
     pub factions: Vec<FactionInfo>,
@@ -195,8 +197,7 @@ fn security() {
     assert!(!(anarchy < none));
 }
 
-// TODO: test
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,
@@ -206,6 +207,26 @@ pub enum PowerplayState {
     Controlled,
     Turmoil,
     HomeSystem,
+    // The standings the second Powerplay added. A system is acquired and then
+    // built up, so it stands at one of these rather than merely exploited.
+    Unoccupied,
+    Fortified,
+    Stronghold,
+}
+
+#[test]
+fn powerplay_state() {
+    let read = |json: &str| {
+        serde_json::from_str::<PowerplayState>(json)
+            .unwrap_or_else(|e| panic!("{} should read: {}", json, e))
+    };
+
+    assert_eq!(PowerplayState::Exploited, read(r#""Exploited""#));
+    // The second Powerplay's three, which a live feed sends more of than it
+    // sends the first Powerplay's.
+    assert_eq!(PowerplayState::Unoccupied, read(r#""Unoccupied""#));
+    assert_eq!(PowerplayState::Fortified, read(r#""Fortified""#));
+    assert_eq!(PowerplayState::Stronghold, read(r#""Stronghold""#));
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]

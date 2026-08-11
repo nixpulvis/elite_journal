@@ -29,6 +29,8 @@ pub struct ApproachSettlement {
     pub longitude: Option<f64>,
 
     #[serde(rename = "StationFaction")]
+    #[serde(default)]
+    #[serde(deserialize_with = "crate::de::empty_map_is_none")]
     pub faction: Option<Faction>,
     #[serde(rename = "StationGovernment")]
     pub government: Option<Government>,

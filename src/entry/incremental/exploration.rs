@@ -1,6 +1,8 @@
+use crate::body::Discovery;
 use crate::prelude::*;
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
+use serde::{de, Deserialize, Deserializer};
+use std::collections::BTreeMap as Map;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -37,17 +39,70 @@ pub enum ScanType {
     AutoScan,
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
+/// What a `Scan` turned out to be about
+#[derive(Debug)]
 pub enum ScanTarget {
     Star(Star),
     Body(Body),
+    Cluster(Cluster),
+}
+
+impl<'de> Deserialize<'de> for ScanTarget {
+    /// Read the field that tells the three apart, then read that one variant
+    ///
+    /// `#[serde(untagged)]` instead tries each in turn and, when none fits,
+    /// reports only that none fitted. Which field of which variant was wrong
+    /// it does not say, and a scan is thirty fields wide.
+    ///
+    /// It is also unsound here. A cluster asks for the little that every scan
+    /// carries, so under `untagged` it would accept a star that had failed its
+    /// own variant over a single missing field, and the star would be filed as
+    /// a stretch of belt. A scan says which of the three it is: a star carries
+    /// `StarType`, a planet `PlanetClass`, and a cluster has neither because
+    /// there is nothing there to classify.
+    fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
+        let scan = serde_json::Value::deserialize(de)?;
+
+        if scan.get("StarType").is_some() {
+            Star::deserialize(scan).map(ScanTarget::Star)
+        } else if scan.get("PlanetClass").is_some() {
+            Body::deserialize(scan).map(ScanTarget::Body)
+        } else {
+            Cluster::deserialize(scan).map(ScanTarget::Cluster)
+        }
+        .map_err(de::Error::custom)
+    }
+}
+
+/// A belt cluster, which is scanned as a body and has none of a body's figures
+///
+/// A quarter of the scans EDDN carries are these. No class, mass, radius or
+/// temperature, because there is no single object there to measure: it is a
+/// stretch of a belt, named for the ring it belongs to and numbered among the
+/// system's bodies.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Cluster {
+    #[serde(rename = "BodyName")]
+    pub name: String,
+    #[serde(rename = "BodyID")]
+    pub id: i16,
+    /// The ring it lies in, and what that ring goes round
+    #[serde(default)]
+    pub parents: Vec<Map<String, i16>>,
+    #[serde(rename = "DistanceFromArrivalLS")]
+    pub distance_from_arrival: Option<f32>,
+    #[serde(flatten)]
+    pub discovery: Discovery,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Scan {
-    pub scan_type: String,
+    /// How close a look was taken, where the sender says
+    ///
+    /// [`None`] because not every uploader sends it, and nothing here reads it.
+    pub scan_type: Option<String>,
     pub star_system: String,
     pub star_pos: Coordinate,
     pub system_address: i64,

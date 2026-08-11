@@ -111,6 +111,9 @@ pub enum Government {
     Engineer,
     #[serde(alias = "$government_Carrier;")]
     Carrier,
+    /// Whoever runs a megaconstruction site, as the game names it
+    #[serde(alias = "$government_Megaconstruction;")]
+    Megaconstruction,
     #[serde(alias = "")]
     #[serde(alias = "$government_None;")]
     None,
@@ -156,6 +159,9 @@ fn government() {
     )
     .unwrap();
     assert_eq!(Government::Dictatorship, extraction);
+    let megaconstruction: Government =
+        serde_json::from_str(r#""$government_Megaconstruction;""#).unwrap();
+    assert_eq!(Government::Megaconstruction, megaconstruction);
     assert!(Government::None != Government::None);
     assert!(serde_json::from_str::<Government>(r#""$government_None;""#)
         .unwrap()
@@ -178,6 +184,12 @@ pub enum Allegiance {
     PilotsFederation,
     PlayerPilots,
     Thargoid,
+    /// The contractor running a Frontline Solutions site
+    ///
+    /// Not a power in the galaxy but a company, and the game says it where an
+    /// allegiance goes: a combat zone installation stands for whoever set it
+    /// up rather than for either side fighting over it.
+    FrontlineSolutions,
     #[serde(alias = "")]
     None,
 }
@@ -222,6 +234,9 @@ fn allegiance() {
     )
     .unwrap();
     assert_eq!(Allegiance::PlayerPilots, player_pilots);
+    let frontline: Allegiance =
+        serde_json::from_str(r#""FrontlineSolutions""#).unwrap();
+    assert_eq!(Allegiance::FrontlineSolutions, frontline);
     assert!(Allegiance::None != Allegiance::None);
     assert!(serde_json::from_str::<Allegiance>(r#""None""#).unwrap().is_null());
     assert!(serde_json::from_str::<Allegiance>(r#""""#).unwrap().is_null());

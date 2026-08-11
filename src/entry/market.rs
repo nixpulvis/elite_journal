@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 #[cfg(feature = "with-sqlx")]
 use sqlx::postgres::{PgHasArrayType, PgTypeInfo};
 
@@ -23,9 +23,38 @@ pub struct Commodity {
     pub buy_price: i32,
     pub sell_price: i32,
     pub demand: i32,
+    #[serde(deserialize_with = "bracket")]
     pub demand_bracket: i32,
     pub stock: i32,
+    #[serde(deserialize_with = "bracket")]
     pub stock_bracket: i32,
+}
+
+/// A bracket, or the empty string sent where there is no bracket
+///
+/// EDDN's commodity schema allows either, and the CAPI sends the empty string
+/// for a commodity a station neither stocks nor wants: a carrier listing
+/// tritium it sells reports its demand bracket that way. Read as a number and
+/// nothing else, one such commodity dropped the whole market message.
+///
+/// Read as zero, which is the bracket meaning none. That does conflate it with
+/// a station reporting zero outright, and the two mean the same thing here.
+fn bracket<'de, D: Deserializer<'de>>(de: D) -> Result<i32, D::Error> {
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Bracket {
+        Given(i32),
+        Missing(String),
+    }
+
+    match Bracket::deserialize(de)? {
+        Bracket::Given(bracket) => Ok(bracket),
+        Bracket::Missing(text) if text.is_empty() => Ok(0),
+        Bracket::Missing(text) => Err(de::Error::custom(format!(
+            "expected a bracket or nothing, got {:?}",
+            text
+        ))),
+    }
 }
 
 #[cfg(feature = "with-sqlx")]
@@ -294,5 +323,76 @@ mod tests {
 
         assert_eq!(entry.event.commodities[0].name, "gold");
         assert_eq!(entry.event.commodities[0].sell_price, 9432);
+    }
+
+    /// A commodity with no bracket reads, and takes the market with it
+    ///
+    /// Taken from a carrier selling tritium it has no demand for. One field of
+    /// one commodity used to cost the whole message: the station, every price
+    /// in it, and what it prohibits.
+    #[test]
+    fn a_commodity_without_a_bracket_still_reads() {
+        let entry: Entry<Market> = serde_json::from_str(
+            r#"{
+                "timestamp": "2026-08-11T19:09:10Z",
+                "systemName": "Ratraii",
+                "stationName": "TLF-6XX",
+                "marketId": 3708296448,
+                "commodities": [
+                    {
+                        "name": "tritium",
+                        "meanPrice": 0,
+                        "buyPrice": 135262,
+                        "stock": 3278,
+                        "stockBracket": 2,
+                        "sellPrice": 0,
+                        "demand": 0,
+                        "demandBracket": ""
+                    }
+                ]
+            }"#,
+        )
+        .expect("a market with an empty bracket should parse");
+
+        let commodity = &entry.event.commodities[0];
+        assert_eq!(commodity.name, "tritium");
+        assert_eq!(commodity.stock_bracket, 2);
+        assert_eq!(commodity.demand_bracket, 0);
+    }
+
+    /// Anything else where a bracket goes is still reported
+    ///
+    /// Only the empty string is allowed there. A bracket sent as some other
+    /// word is the feed saying something this does not understand, and reading
+    /// it as none would be inventing an answer.
+    #[test]
+    fn a_bracket_that_is_neither_a_number_nor_nothing_is_reported() {
+        let err = serde_json::from_str::<Entry<Market>>(
+            r#"{
+                "timestamp": "2026-08-11T19:09:10Z",
+                "systemName": "Ratraii",
+                "stationName": "TLF-6XX",
+                "marketId": 3708296448,
+                "commodities": [
+                    {
+                        "name": "tritium",
+                        "meanPrice": 0,
+                        "buyPrice": 135262,
+                        "stock": 3278,
+                        "stockBracket": "plenty",
+                        "sellPrice": 0,
+                        "demand": 0,
+                        "demandBracket": 0
+                    }
+                ]
+            }"#,
+        )
+        .expect_err("a worded bracket should not read");
+
+        assert!(
+            err.to_string().contains("plenty"),
+            "did not say what it got: {}",
+            err,
+        );
     }
 }

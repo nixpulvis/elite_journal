@@ -187,6 +187,7 @@ pub struct Body {
     pub parents: Vec<Map<String, i16>>,
 
     pub planet_class: String, // TODO: e.g. "Rocky body"
+    #[serde(default)]
     pub tidal_lock: bool,
     /// Body masses in units of earth masses
     #[serde(rename = "MassEM")]
@@ -197,8 +198,9 @@ pub struct Body {
     /// one
     #[serde(rename = "SurfaceGravity")]
     pub gravity: f32,
+    /// [`None`] where the scan was a basic one, which does not report it
     #[serde(rename = "SurfaceTemperature")]
-    pub temperature: f32,
+    pub temperature: Option<f32>,
     /// [`None`] for a body with no surface, which is to say a gas giant
     #[serde(flatten)]
     pub surface: Option<Surface>,

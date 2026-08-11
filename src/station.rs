@@ -17,6 +17,8 @@ pub struct Station {
     #[serde(rename = "LandingPads")]
     pub landing_pads: Option<LandingPads>,
     #[serde(rename = "StationFaction")]
+    #[serde(default)]
+    #[serde(deserialize_with = "crate::de::empty_map_is_none")]
     pub faction: Option<Faction>,
     #[serde(rename = "StationGovernment")]
     pub government: Option<Government>,
@@ -61,6 +63,15 @@ pub enum StationType {
     Ocellus,
     Orbis,
     Outpost,
+    /// A station standing on a planet, which is not the same as a crater port
+    SurfaceStation,
+    /// An Odyssey settlement, walked around rather than landed in
+    OnFootSettlement,
+    /// The eight sided orbital, which the game spells in full nowhere
+    Dodec,
+    // Where a colonisation project is built up, in orbit and on the ground.
+    SpaceConstructionDepot,
+    PlanetaryConstructionDepot,
 }
 
 impl fmt::Display for StationType {
@@ -85,6 +96,7 @@ pub enum DockingDeniedReason {
     Distance,
     ActiveFighter,
     NoReason,
+    RestrictedAccess,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -165,6 +177,22 @@ pub enum Service {
     ApexInterstellar,
     #[serde(rename = "frontlinesolutions")]
     FrontlineSolutions,
+    /// Where a system is claimed for colonisation
+    #[serde(rename = "registeringcolonisation")]
+    RegisteringColonisation,
+    /// Where materials are handed over to a colonisation project
+    #[serde(rename = "colonisationcontribution")]
+    ColonisationContribution,
+    /// A mission offered on docking rather than from the mission board
+    #[serde(rename = "ondockmission")]
+    OnDockMission,
+    #[serde(rename = "squadronBank")]
+    SquadronBank,
+    #[serde(rename = "refinery")]
+    Refinery,
+    /// The carrier's own shop, as against the services it runs for others
+    #[serde(rename = "carriervendor")]
+    CarrierVendor,
 }
 
 #[cfg(feature = "with-sqlx")]
@@ -190,4 +218,54 @@ impl PgHasArrayType for EconomyShare {
     fn array_type_info() -> PgTypeInfo {
         PgTypeInfo::with_name("_economyshare")
     }
+}
+
+#[test]
+fn service() {
+    let read = |json: &str| {
+        serde_json::from_str::<Service>(json)
+            .unwrap_or_else(|e| panic!("{} should read: {}", json, e))
+    };
+
+    assert_eq!(Service::Dock, read(r#""dock""#));
+    // Lowercase and unbroken, as every service is, however many words the
+    // name is made of.
+    assert_eq!(
+        Service::RegisteringColonisation,
+        read(r#""registeringcolonisation""#)
+    );
+    assert_eq!(
+        Service::ColonisationContribution,
+        read(r#""colonisationcontribution""#)
+    );
+    assert_eq!(Service::OnDockMission, read(r#""ondockmission""#));
+    // Camel cased, as a handful of them are and most are not.
+    assert_eq!(Service::SquadronBank, read(r#""squadronBank""#));
+    assert_eq!(Service::Refinery, read(r#""refinery""#));
+    assert_eq!(Service::CarrierVendor, read(r#""carriervendor""#));
+}
+
+/// The kinds of station the game docks at and lands on
+///
+/// Every one of these was sent by the live feed while going unread, and a
+/// station whose kind would not read took its whole message with it.
+#[test]
+fn station_type() {
+    let read = |json: &str| {
+        serde_json::from_str::<StationType>(json)
+            .unwrap_or_else(|e| panic!("{} should read: {}", json, e))
+    };
+
+    assert_eq!(StationType::Coriolis, read(r#""Coriolis""#));
+    assert_eq!(StationType::SurfaceStation, read(r#""SurfaceStation""#));
+    assert_eq!(StationType::OnFootSettlement, read(r#""OnFootSettlement""#));
+    assert_eq!(StationType::Dodec, read(r#""Dodec""#));
+    assert_eq!(
+        StationType::SpaceConstructionDepot,
+        read(r#""SpaceConstructionDepot""#)
+    );
+    assert_eq!(
+        StationType::PlanetaryConstructionDepot,
+        read(r#""PlanetaryConstructionDepot""#)
+    );
 }
