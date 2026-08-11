@@ -246,6 +246,7 @@ mod tests {
     use super::*;
     use crate::entry::incremental::exploration::ScanTarget;
     use crate::entry::Entry;
+    use crate::system::Economy;
 
     /// Read a whole message the way the consumer does, tag and all
     fn event(json: &str) -> Event {
@@ -1081,5 +1082,95 @@ mod tests {
         // difference.
         assert_eq!(ring.parents[0].get("Planet"), Some(&64));
         assert_eq!(ring.orbit.orbital_period, 15402.967334);
+    }
+
+    /// An orbit short of its last two still reads
+    ///
+    /// Taken from the feed. The game sends all seven; `Stellar Data Relay`
+    /// sends five, and the five are the path. Where the body stood along it is
+    /// what the other two would have said.
+    #[test]
+    fn an_orbit_without_its_last_two_still_reads() {
+        let Event::Scan(scan) = assert_read(
+            r#"{
+                "timestamp": "2026-08-11T22:20:15Z",
+                "event": "Scan",
+                "ScanType": "AutoScan",
+                "StarSystem": "Colonia",
+                "StarPos": [-9530.5, -910.28125, 19808.125],
+                "SystemAddress": 3238296097059,
+                "BodyName": "Colonia 7 c",
+                "BodyID": 50,
+                "Parents": [{ "Star": 44 }, { "Star": 0 }],
+                "PlanetClass": "Rocky body",
+                "TidalLock": true,
+                "MassEM": 0.029988,
+                "Radius": 2152178.5,
+                "SurfaceGravity": 2.580479,
+                "SurfaceTemperature": 128.0793,
+                "SurfacePressure": 0,
+                "Landable": true,
+                "Atmosphere": "",
+                "AtmosphereType": "None",
+                "Volcanism": "",
+                "TerraformState": "",
+                "Composition": { "Ice": 0, "Metal": 0.088844, "Rock": 0.911156 },
+                "SemiMajorAxis": 10566104650.497437,
+                "Eccentricity": 0.000385,
+                "OrbitalInclination": -0.010772,
+                "Periapsis": 185.317867,
+                "OrbitalPeriod": 5153734.087944,
+                "RotationPeriod": 5153831.783096,
+                "AxialTilt": 0.032617,
+                "WasDiscovered": true,
+                "WasMapped": true
+            }"#,
+        ) else {
+            panic!("not a scan")
+        };
+
+        let ScanTarget::Body(body) = scan.target else { panic!("not a body") };
+
+        // The path is known.
+        assert_eq!(body.orbit.semi_major_axis, 10566104650.497437);
+        assert_eq!(body.orbit.orbital_period, 5153734.087944);
+        // Where it stood along the path is not.
+        assert_eq!(body.orbit.ascending_node, None);
+        assert_eq!(body.orbit.mean_anomaly, None);
+    }
+
+    /// A rescue ship trades under an economy of its own
+    ///
+    /// A megaship sent to a system whose station has been attacked. Docking at
+    /// one carries `$economy_Rescue;`.
+    #[test]
+    fn a_rescue_ship_docks_under_its_own_economy() {
+        let Event::Docked(docked) = assert_read(
+            r#"{
+                "timestamp": "2026-08-11T22:26:55Z",
+                "event": "Docked",
+                "StarSystem": "Luyten's Star",
+                "StarPos": [6.5625, 2.34375, -10.25],
+                "SystemAddress": 7268024264097,
+                "StationName": "Rescue Ship Hutner",
+                "StationType": "MegaShip",
+                "MarketID": 129020287,
+                "StationFaction": { "Name": "Independent Rescue Coalition" },
+                "StationGovernment": "$government_Corporate;",
+                "StationEconomy": "$economy_Rescue;",
+                "StationEconomies": [
+                    { "Name": "$economy_Rescue;", "Proportion": 1 }
+                ],
+                "DistFromStarLS": 297.0377,
+                "LandingPads": { "Small": 4, "Medium": 2, "Large": 1 }
+            }"#,
+        ) else {
+            panic!("not a docking")
+        };
+
+        let economies =
+            docked.station.economies.as_ref().expect("an economy share");
+        assert_eq!(economies.len(), 1);
+        assert_eq!(economies[0].name, Economy::Rescue);
     }
 }

@@ -114,8 +114,12 @@ pub struct Surface {
 
 /// The path a thing takes around whatever it goes round
 ///
-/// The seven arrive together or not at all: a scan of something that orbits
-/// nothing carries none of them.
+/// The first five arrive together or not at all: a scan of something that
+/// orbits nothing carries none of them.
+///
+/// The last two are sent by the game and not by every uploader that passes its
+/// scans on, so either may be absent from a scan carrying the rest. Without
+/// them the path is known and where the thing stands along it is not.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Orbit {
@@ -124,8 +128,10 @@ pub struct Orbit {
     pub orbital_inclination: f32,
     pub periapsis: f32,
     pub orbital_period: f32,
-    pub ascending_node: f32,
-    pub mean_anomaly: f32,
+    #[serde(default)]
+    pub ascending_node: Option<f32>,
+    #[serde(default)]
+    pub mean_anomaly: Option<f32>,
 }
 
 /// How a thing turns on its own axis

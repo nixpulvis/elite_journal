@@ -258,6 +258,8 @@ pub enum Economy {
     Carrier,
     #[serde(alias = "$economy_Prison;")]
     Prison,
+    #[serde(alias = "$economy_Rescue;")]
+    Rescue,
     #[serde(alias = "$economy_Undefined;")]
     Undefined,
     #[serde(alias = "")]
