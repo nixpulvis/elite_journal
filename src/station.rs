@@ -87,7 +87,7 @@ pub enum PadSize {
     Large,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub enum DockingDeniedReason {
     NoSpace,
     TooLarge,
@@ -97,6 +97,9 @@ pub enum DockingDeniedReason {
     ActiveFighter,
     NoReason,
     RestrictedAccess,
+    /// Spelled `DockingUnavliable` by the game, which is what is matched on
+    #[serde(rename = "DockingUnavliable")]
+    DockingUnavailable,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -267,5 +270,25 @@ fn station_type() {
     assert_eq!(
         StationType::PlanetaryConstructionDepot,
         read(r#""PlanetaryConstructionDepot""#)
+    );
+}
+
+/// Why docking was refused, as the game spells each reason
+#[test]
+fn docking_denied_reason() {
+    let read = |json: &str| {
+        serde_json::from_str::<DockingDeniedReason>(json)
+            .unwrap_or_else(|e| panic!("{} should read: {}", json, e))
+    };
+
+    assert_eq!(DockingDeniedReason::NoSpace, read(r#""NoSpace""#));
+    assert_eq!(
+        DockingDeniedReason::RestrictedAccess,
+        read(r#""RestrictedAccess""#)
+    );
+    // The game's own spelling, which is not ours to correct on the wire.
+    assert_eq!(
+        DockingDeniedReason::DockingUnavailable,
+        read(r#""DockingUnavliable""#)
     );
 }
