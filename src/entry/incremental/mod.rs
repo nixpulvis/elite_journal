@@ -1193,4 +1193,48 @@ mod tests {
         assert_eq!(economies.len(), 1);
         assert_eq!(economies[0].name, Economy::Rescue);
     }
+
+    /// A planet that arrived without its class is reported, not filed as a ring
+    ///
+    /// A ring is a path and nothing else. This carries a radius, a mass and a
+    /// rotation, so whatever it is it is not a path, and being unable to say
+    /// what it is beats saying the wrong thing about it.
+    #[test]
+    fn a_planet_short_of_its_class_is_not_taken_for_a_ring() {
+        let err = serde_json::from_str::<Entry<Event>>(
+            r#"{
+                "timestamp": "2026-08-11T22:20:15Z",
+                "event": "Scan",
+                "ScanType": "Detailed",
+                "StarSystem": "Colonia",
+                "StarPos": [-9530.5, -910.28125, 19808.125],
+                "SystemAddress": 3238296097059,
+                "BodyName": "Colonia 7 c",
+                "BodyID": 50,
+                "Parents": [{ "Star": 44 }, { "Star": 0 }],
+                "MassEM": 0.029988,
+                "Radius": 2152178.5,
+                "SurfaceGravity": 2.580479,
+                "SurfaceTemperature": 128.0793,
+                "SemiMajorAxis": 10566104650.497437,
+                "Eccentricity": 0.000385,
+                "OrbitalInclination": -0.010772,
+                "Periapsis": 185.317867,
+                "OrbitalPeriod": 5153734.087944,
+                "RotationPeriod": 5153831.783096,
+                "AxialTilt": 0.032617,
+                "WasDiscovered": true,
+                "WasMapped": true
+            }"#,
+        )
+        .expect_err("a planet with no class should not read as anything");
+
+        let said = err.to_string();
+        assert!(
+            said.contains("no kind read here"),
+            "did not report it: {}",
+            said,
+        );
+        assert!(said.contains("Colonia 7 c"), "did not name it: {}", said);
+    }
 }

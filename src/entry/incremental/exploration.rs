@@ -63,10 +63,10 @@ impl<'de> Deserialize<'de> for ScanTarget {
     /// Each of the four is asked for by something it has rather than by
     /// something it lacks: a star carries `StarType`, a planet `PlanetClass`, a
     /// cluster lies in a ring and names it as the nearest of its parents, and a
-    /// ring goes round a body and carries the orbit to prove it. A scan
-    /// answering to none of them is reported, since a shape nobody has modelled
-    /// stored as the nearest thing to hand is worse than a shape nobody has
-    /// modelled said out loud.
+    /// ring carries an orbit and nothing of substance. A scan answering to none
+    /// of them is reported, since a shape nobody has modelled stored as the
+    /// nearest thing to hand is worse than a shape nobody has modelled said out
+    /// loud.
     fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
         let scan = serde_json::Value::deserialize(de)?;
 
@@ -76,7 +76,7 @@ impl<'de> Deserialize<'de> for ScanTarget {
             Body::deserialize(scan).map(ScanTarget::Body)
         } else if lies_in_a_ring(&scan) {
             Cluster::deserialize(scan).map(ScanTarget::Cluster)
-        } else if scan.get("SemiMajorAxis").is_some() {
+        } else if carries_only_an_orbit(&scan) {
             Ring::deserialize(scan).map(ScanTarget::Ring)
         } else {
             return Err(de::Error::custom(format!(
@@ -99,6 +99,19 @@ fn lies_in_a_ring(scan: &serde_json::Value) -> bool {
     scan.get("Parents")
         .and_then(|parents| parents.get(0))
         .is_some_and(|nearest| nearest.get("Ring").is_some())
+}
+
+/// Whether a scan says where a thing goes and nothing about the thing
+///
+/// What a ring is: a name, an id, what it goes round, and the path. A star and
+/// a planet each carry what they are made of as well, and of that a radius and
+/// a rotation are the two every one of them has. So a scan carrying either is
+/// not a ring however much else it is missing, and a planet that arrived
+/// without its class is reported rather than filed as a path.
+fn carries_only_an_orbit(scan: &serde_json::Value) -> bool {
+    scan.get("SemiMajorAxis").is_some()
+        && scan.get("Radius").is_none()
+        && scan.get("RotationPeriod").is_none()
 }
 
 /// A ring, scanned in its own right rather than as something a body carries
