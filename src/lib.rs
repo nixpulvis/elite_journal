@@ -111,7 +111,6 @@ pub enum Government {
     Engineer,
     #[serde(alias = "$government_Carrier;")]
     Carrier,
-    /// Whoever runs a megaconstruction site, as the game names it
     #[serde(alias = "$government_Megaconstruction;")]
     Megaconstruction,
     #[serde(alias = "")]
@@ -184,11 +183,7 @@ pub enum Allegiance {
     PilotsFederation,
     PlayerPilots,
     Thargoid,
-    /// The contractor running a Frontline Solutions site
-    ///
-    /// Not a power in the galaxy but a company, and the game says it where an
-    /// allegiance goes: a combat zone installation stands for whoever set it
-    /// up rather than for either side fighting over it.
+    /// A company rather than a power, which is where the game puts it
     FrontlineSolutions,
     #[serde(alias = "")]
     None,
