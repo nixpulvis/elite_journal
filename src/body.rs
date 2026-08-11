@@ -187,8 +187,8 @@ pub struct Body {
     pub parents: Vec<Map<String, i16>>,
 
     pub planet_class: String, // TODO: e.g. "Rocky body"
-    #[serde(default)]
-    pub tidal_lock: bool,
+    /// [`None`] where the scan does not report it, which a basic one does not
+    pub tidal_lock: Option<bool>,
     /// Body masses in units of earth masses
     #[serde(rename = "MassEM")]
     pub mass: f32,
