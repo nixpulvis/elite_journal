@@ -967,4 +967,119 @@ mod tests {
         assert_eq!(settlement.name, "$Ancient:#index=3;");
         assert!(settlement.faction.is_none());
     }
+
+    /// A scan answering to none of the four kinds is reported, not stored
+    ///
+    /// Each kind is asked for by something it has, so a shape carrying none of
+    /// those things is not quietly taken for the nearest kind to hand. Nothing
+    /// the game sends today looks like this; the point is what happens when
+    /// something does.
+    #[test]
+    fn a_scan_of_no_known_kind_is_reported() {
+        let err = serde_json::from_str::<Entry<Event>>(
+            r#"{
+                "timestamp": "2026-08-11T20:00:00Z",
+                "event": "Scan",
+                "ScanType": "Detailed",
+                "StarSystem": "Sol",
+                "StarPos": [0.0, 0.0, 0.0],
+                "SystemAddress": 10477373803,
+                "BodyName": "Sol 5 Something New",
+                "BodyID": 9,
+                "Parents": [{ "Planet": 8 }, { "Star": 0 }],
+                "DistanceFromArrivalLS": 2.5,
+                "WasDiscovered": true,
+                "WasMapped": false
+            }"#,
+        )
+        .expect_err("a scan of no known kind should not read");
+
+        let said = err.to_string();
+        assert!(
+            said.contains("no kind read here"),
+            "did not say what was wrong: {}",
+            said,
+        );
+        // And which one it was, since a feed carries thirty a second.
+        assert!(
+            said.contains("Sol 5 Something New"),
+            "did not name it: {}",
+            said,
+        );
+    }
+
+    /// A cluster is taken by the ring it lies in
+    ///
+    /// The nearest of its parents, which is what the game says of a belt
+    /// cluster and of nothing else.
+    #[test]
+    fn a_cluster_is_taken_by_the_ring_it_lies_in() {
+        let Event::Scan(scan) = assert_read(
+            r#"{
+                "timestamp": "2026-08-11T19:44:56Z",
+                "event": "Scan",
+                "ScanType": "AutoScan",
+                "BodyName": "Synuefe UF-K b55-4 A A Belt Cluster 5",
+                "BodyID": 10,
+                "Parents": [{ "Ring": 5 }, { "Star": 1 }, { "Null": 0 }],
+                "StarSystem": "Synuefe UF-K b55-4",
+                "StarPos": [386.75, -220.125, 125.25],
+                "SystemAddress": 9472147072473,
+                "DistanceFromArrivalLS": 5.433045,
+                "WasDiscovered": true,
+                "WasMapped": false
+            }"#,
+        ) else {
+            panic!("not a scan")
+        };
+
+        let ScanTarget::Cluster(cluster) = scan.target else {
+            panic!("a cluster in a ring should be read as one")
+        };
+        assert_eq!(cluster.id, 10);
+        assert_eq!(cluster.parents[0].get("Ring"), Some(&5));
+    }
+
+    /// A ring scanned in its own right is read as one
+    ///
+    /// Taken from the feed. It goes round a planet and carries the orbit to
+    /// prove it, which is what tells it from a belt cluster lying in a ring.
+    #[test]
+    fn a_ring_scanned_in_its_own_right_is_read_as_one() {
+        let Event::Scan(scan) = assert_read(
+            r#"{
+                "timestamp": "2026-08-11T21:16:29Z",
+                "event": "Scan",
+                "ScanType": "AutoScan",
+                "BodyName": "Dryeejeae AA-A d4 D 12 A Ring",
+                "BodyID": 65,
+                "Parents": [{ "Planet": 64 }, { "Star": 6 }, { "Null": 0 }],
+                "StarSystem": "Dryeejeae AA-A d4",
+                "StarPos": [-8982.125, 1258.21875, 10460.625],
+                "SystemAddress": 146037542275,
+                "DistanceFromArrivalLS": 377022.119004,
+                "SemiMajorAxis": 36267683.804035,
+                "Eccentricity": 0,
+                "OrbitalInclination": 0,
+                "Periapsis": 0,
+                "OrbitalPeriod": 15402.967334,
+                "AscendingNode": 0,
+                "MeanAnomaly": 166.00566,
+                "WasDiscovered": false,
+                "WasMapped": false
+            }"#,
+        ) else {
+            panic!("not a scan")
+        };
+
+        let ScanTarget::Ring(ring) = scan.target else {
+            panic!("a ring should not be read as anything else")
+        };
+        assert_eq!(ring.name, "Dryeejeae AA-A d4 D 12 A Ring");
+        assert_eq!(ring.id, 65);
+        // It goes round the planet, not in a ring, which is the whole
+        // difference.
+        assert_eq!(ring.parents[0].get("Planet"), Some(&64));
+        assert_eq!(ring.orbit.orbital_period, 15402.967334);
+    }
 }

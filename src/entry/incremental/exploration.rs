@@ -45,10 +45,11 @@ pub enum ScanTarget {
     Star(Star),
     Body(Body),
     Cluster(Cluster),
+    Ring(Ring),
 }
 
 impl<'de> Deserialize<'de> for ScanTarget {
-    /// Read the field that tells the three apart, then read that one variant
+    /// Read the field that tells the four apart, then read that one variant
     ///
     /// `#[serde(untagged)]` instead tries each in turn and, when none fits,
     /// reports only that none fitted. Which field of which variant was wrong
@@ -57,9 +58,15 @@ impl<'de> Deserialize<'de> for ScanTarget {
     /// It is also unsound here. A cluster asks for the little that every scan
     /// carries, so under `untagged` it would accept a star that had failed its
     /// own variant over a single missing field, and the star would be filed as
-    /// a stretch of belt. A scan says which of the three it is: a star carries
-    /// `StarType`, a planet `PlanetClass`, and a cluster has neither because
-    /// there is nothing there to classify.
+    /// a stretch of belt.
+    ///
+    /// Each of the four is asked for by something it has rather than by
+    /// something it lacks: a star carries `StarType`, a planet `PlanetClass`, a
+    /// cluster lies in a ring and names it as the nearest of its parents, and a
+    /// ring goes round a body and carries the orbit to prove it. A scan
+    /// answering to none of them is reported, since a shape nobody has modelled
+    /// stored as the nearest thing to hand is worse than a shape nobody has
+    /// modelled said out loud.
     fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
         let scan = serde_json::Value::deserialize(de)?;
 
@@ -67,11 +74,56 @@ impl<'de> Deserialize<'de> for ScanTarget {
             Star::deserialize(scan).map(ScanTarget::Star)
         } else if scan.get("PlanetClass").is_some() {
             Body::deserialize(scan).map(ScanTarget::Body)
-        } else {
+        } else if lies_in_a_ring(&scan) {
             Cluster::deserialize(scan).map(ScanTarget::Cluster)
+        } else if scan.get("SemiMajorAxis").is_some() {
+            Ring::deserialize(scan).map(ScanTarget::Ring)
+        } else {
+            return Err(de::Error::custom(format!(
+                "a scan of no kind read here: {}",
+                scan.get("BodyName")
+                    .and_then(|name| name.as_str())
+                    .unwrap_or("something unnamed")
+            )));
         }
         .map_err(de::Error::custom)
     }
+}
+
+/// Whether the nearest thing a scan hangs off is a ring
+///
+/// What a belt cluster is: a stretch of one of the rings a star or a planet
+/// carries. The game says so in the first of its parents, nearest first, and
+/// says it of nothing else.
+fn lies_in_a_ring(scan: &serde_json::Value) -> bool {
+    scan.get("Parents")
+        .and_then(|parents| parents.get(0))
+        .is_some_and(|nearest| nearest.get("Ring").is_some())
+}
+
+/// A ring, scanned in its own right rather than as something a body carries
+///
+/// A body's own scan lists the rings it has, with what they are made of and how
+/// wide they are. This is the other way the game reports one: as a body in the
+/// numbering, going round the body it belongs to, carrying an orbit and nothing
+/// else. It is the orbit that tells it from a belt cluster, which lies in a ring
+/// and has none.
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Ring {
+    #[serde(rename = "BodyName")]
+    pub name: String,
+    #[serde(rename = "BodyID")]
+    pub id: i16,
+    /// The body it goes round, nearest first
+    #[serde(default)]
+    pub parents: Vec<Map<String, i16>>,
+    #[serde(rename = "DistanceFromArrivalLS")]
+    pub distance_from_arrival: Option<f32>,
+    #[serde(flatten)]
+    pub orbit: Orbit,
+    #[serde(flatten)]
+    pub discovery: Discovery,
 }
 
 /// A belt cluster, which is scanned as a body and has none of a body's figures
