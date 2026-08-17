@@ -17,9 +17,10 @@ pub struct ApproachSettlement {
     #[serde(rename = "MarketID")]
     pub market_id: Option<i64>,
 
+    /// [`None`] as the game writes it, which names only the address
     #[serde(rename = "StarSystem")]
-    pub system_name: String,
-    pub star_pos: Coordinate,
+    pub system_name: Option<String>,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     #[serde(rename = "BodyID")]

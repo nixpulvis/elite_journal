@@ -198,7 +198,8 @@ pub enum Event {
     FsdJump(travel::FsdJump),
     CarrierJump(travel::CarrierJump),
 
-    /// Signals an update to the [`NavRoute.json`][crate::entry::route] file
+    /// A route plotted, whose stops are in
+    /// [`NavRoute.json`][crate::entry::route] where the game wrote it
     NavRoute(NavRoute),
 
     BuyExplorationData(exploration::BuyExplorationData),
@@ -232,15 +233,16 @@ pub mod exploration;
 pub mod startup;
 pub mod travel;
 
-/// Every event read here, read from the shape EDDN actually sends
+/// Every event read here, read from both of the shapes it arrives in
 ///
-/// Written against the schemas rather than against the structs. A struct that
-/// disagrees with the game about a field name parses nothing, and says so
-/// nowhere: the event simply never matches and is filed as
-/// [`Event::Other`] forever. That is not a failure any amount of running the
-/// thing will show you, which is what these are for.
+/// Written against the schema and the journal manual rather than against the
+/// structs. A struct that disagrees with the game about a field name parses
+/// nothing, and says so nowhere: the event simply never matches and is filed
+/// as [`Event::Other`] forever. That is not a failure any amount of running
+/// the thing will show you, which is what these are for.
 ///
 /// <https://github.com/EDCD/EDDN/tree/master/schemas>
+/// <https://elite-journal.readthedocs.io/>
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -441,7 +443,7 @@ mod tests {
             panic!("not a beacon scan")
         };
 
-        assert_eq!(scan.star_system, "Sol");
+        assert_eq!(scan.star_system.as_deref(), Some("Sol"));
         assert_eq!(scan.num_bodies, 40);
     }
 
@@ -1236,5 +1238,279 @@ mod tests {
             said,
         );
         assert!(said.contains("Colonia 7 c"), "did not name it: {}", said);
+    }
+
+    /// Nothing the game writes carries a position
+    ///
+    /// `StarPos` is on three events and no others, `Location`, `FSDJump` and
+    /// `CarrierJump`. A sender copies it into everything else from the last
+    /// of those, which is what EDDN requires of it and what a journal on disk
+    /// has never been through.
+    #[test]
+    fn a_scan_the_game_wrote_says_where_nothing_is() {
+        let Event::Scan(scan) = assert_read(
+            r#"{
+                "timestamp": "2026-08-11T18:00:00Z",
+                "event": "Scan",
+                "ScanType": "AutoScan",
+                "StarSystem": "Sol",
+                "SystemAddress": 10477373803,
+                "BodyName": "Sol",
+                "BodyID": 0,
+                "Parents": [],
+                "StarType": "G",
+                "Subclass": 2,
+                "StellarMass": 1.0,
+                "Radius": 695700000.0,
+                "AbsoluteMagnitude": 4.83,
+                "Age_MY": 4600,
+                "SurfaceTemperature": 5778.0,
+                "Luminosity": "V",
+                "DistanceFromArrivalLS": 0.0,
+                "RotationPeriod": 2164000.0,
+                "AxialTilt": 0.126,
+                "WasDiscovered": true,
+                "WasMapped": false
+            }"#,
+        ) else {
+            panic!("not a scan")
+        };
+
+        assert_eq!(scan.star_system, "Sol");
+        assert_eq!(scan.star_pos, None);
+
+        let Event::ScanBaryCentre(barycenter) = assert_read(
+            r#"{
+                "timestamp": "2021-07-27T13:52:20Z",
+                "event": "ScanBaryCentre",
+                "StarSystem": "Col 285 Sector YX-N b21-1",
+                "SystemAddress": 2867561768401,
+                "BodyID": 10,
+                "SemiMajorAxis": 2107998251914.978,
+                "Eccentricity": 0.033074,
+                "OrbitalInclination": 0.019013,
+                "Periapsis": 342.187341,
+                "OrbitalPeriod": 3739380657.672882,
+                "AscendingNode": -31.477241,
+                "MeanAnomaly": 64.03028
+            }"#,
+        ) else {
+            panic!("not a barycenter scan")
+        };
+
+        assert_eq!(barycenter.star_pos, None);
+
+        let Event::FssDiscoveryScan(honk) = assert_read(
+            r#"{
+                "timestamp": "2020-08-03T12:52:19Z",
+                "event": "FSSDiscoveryScan",
+                "Progress": 0.68,
+                "BodyCount": 12,
+                "NonBodyCount": 11,
+                "SystemName": "Col 285 Sector CC-K a38-2",
+                "SystemAddress": 2871051298715
+            }"#,
+        ) else {
+            panic!("not a honk")
+        };
+
+        assert_eq!(honk.star_pos, None);
+        assert_eq!(honk.body_count, 12);
+
+        let Event::FssAllBodiesFound(found) = assert_read(
+            r#"{
+                "timestamp": "2020-08-03T12:52:19Z",
+                "event": "FSSAllBodiesFound",
+                "SystemName": "Col 285 Sector CC-K a38-2",
+                "SystemAddress": 2871051298715,
+                "Count": 12
+            }"#,
+        ) else {
+            panic!("not an all-bodies-found")
+        };
+
+        assert_eq!(found.star_pos, None);
+
+        let Event::CodexEntry(entry) = assert_read(
+            r#"{
+                "timestamp": "2019-05-13T13:28:51Z",
+                "event": "CodexEntry",
+                "EntryID": 1400159,
+                "Name": "$Codex_Ent_IceFumarole_CarbonDioxideGeysers_Name;",
+                "SubCategory": "$Codex_SubCategory_Geology_and_Anomalies;",
+                "Category": "$Codex_Category_Biology;",
+                "Region": "$Codex_RegionName_18;",
+                "System": "Hermitage",
+                "SystemAddress": 5363877956440,
+                "IsNewEntry": true
+            }"#,
+        ) else {
+            panic!("not a codex entry")
+        };
+
+        assert_eq!(entry.system_name, "Hermitage");
+        assert_eq!(entry.star_pos, None);
+    }
+
+    /// Four events name no system at all, only its address
+    ///
+    /// The address is enough. Nothing is scanned in a system that was not
+    /// arrived in first, and arriving is what writes the row these point at.
+    #[test]
+    fn some_of_what_the_game_writes_names_no_system() {
+        let Event::NavBeaconScan(beacon) = assert_read(
+            r#"{
+                "timestamp": "2020-08-03T12:52:19Z",
+                "event": "NavBeaconScan",
+                "SystemAddress": 2871051298715,
+                "NumBodies": 12
+            }"#,
+        ) else {
+            panic!("not a beacon scan")
+        };
+
+        assert_eq!(beacon.star_system, None);
+        assert_eq!(beacon.num_bodies, 12);
+
+        let Event::SAASignalsFound(surface) = assert_read(
+            r#"{
+                "timestamp": "2019-04-17T13:38:18Z",
+                "event": "SAASignalsFound",
+                "BodyName": "Hermitage 4 A Ring",
+                "SystemAddress": 5363877956440,
+                "BodyID": 11,
+                "Signals": [{ "Type": "Alexandrite", "Count": 1 }]
+            }"#,
+        ) else {
+            panic!("not a surface scan")
+        };
+
+        assert_eq!(surface.star_system, None);
+        assert_eq!(surface.body_name, "Hermitage 4 A Ring");
+
+        let Event::FssBodySignals(orbital) = assert_read(
+            r#"{
+                "timestamp": "2022-03-17T18:20:53Z",
+                "event": "FSSBodySignals",
+                "BodyName": "Phroi Blou EW-W d1-1056 2 a",
+                "BodyID": 18,
+                "SystemAddress": 36293555558035,
+                "Signals": [
+                    { "Type": "$SAA_SignalType_Geological;", "Count": 3 }
+                ]
+            }"#,
+        ) else {
+            panic!("not body signals")
+        };
+
+        assert_eq!(orbital.star_system, None);
+        assert_eq!(orbital.body_id, 18);
+
+        let Event::ApproachSettlement(settlement) = assert_read(
+            r#"{
+                "timestamp": "2021-03-04T18:23:22Z",
+                "event": "ApproachSettlement",
+                "Name": "Bandi Enterprise",
+                "MarketID": 3510023680,
+                "SystemAddress": 2871051298715,
+                "BodyID": 25,
+                "BodyName": "Col 285 Sector CC-K a38-2 A 5",
+                "Latitude": -25.0,
+                "Longitude": 63.0
+            }"#,
+        ) else {
+            panic!("not a settlement")
+        };
+
+        assert_eq!(settlement.system_name, None);
+        assert_eq!(settlement.name, "Bandi Enterprise");
+    }
+
+    /// The game writes one signal an event, on the event itself
+    ///
+    /// EDDN gathers a system's worth under `signals`, each stamped with when
+    /// it was seen. A signal written alone has no stamp of its own and takes
+    /// the entry's.
+    #[test]
+    fn a_signal_the_game_wrote_is_a_batch_of_one() {
+        let Event::FssSignalDiscovered(found) = assert_read(
+            r#"{
+                "timestamp": "2022-03-17T18:20:53Z",
+                "event": "FSSSignalDiscovered",
+                "SystemAddress": 36293555558035,
+                "SignalName": "$USS_HighGradeEmissions;",
+                "SignalType": "USS",
+                "USSType": "$USS_Type_ValuableSalvage;",
+                "ThreatLevel": 0,
+                "TimeRemaining": 653.0
+            }"#,
+        ) else {
+            panic!("not signals discovered")
+        };
+
+        assert_eq!(found.star_system, None);
+        assert_eq!(found.signals.len(), 1);
+        assert_eq!(found.signals[0].signal_name, "$USS_HighGradeEmissions;");
+        assert_eq!(found.signals[0].threat_level, Some(0));
+        assert_eq!(found.signals[0].timestamp, None);
+    }
+
+    /// A plotted route says only that one was plotted
+    ///
+    /// The stops go in `NavRoute.json` beside the log, which is where the
+    /// game keeps them. EDDN's message carries them in the event.
+    #[test]
+    fn the_log_says_a_route_was_plotted_and_not_where_it_goes() {
+        let Event::NavRoute(plotted) = assert_read(
+            r#"{
+                "timestamp": "2020-04-27T08:02:52Z",
+                "event": "NavRoute"
+            }"#,
+        ) else {
+            panic!("not a route")
+        };
+
+        assert!(plotted.destinations.is_empty());
+
+        let Event::NavRoute(sent) = assert_read(
+            r#"{
+                "timestamp": "2020-04-27T08:02:52Z",
+                "event": "NavRoute",
+                "Route": [
+                    {
+                        "StarSystem": "i Bootis",
+                        "SystemAddress": 1281787693419,
+                        "StarPos": [-22.375, 34.84375, 4.0],
+                        "StarClass": "G"
+                    }
+                ]
+            }"#,
+        ) else {
+            panic!("not a route")
+        };
+
+        assert_eq!(sent.destinations.len(), 1);
+        assert_eq!(sent.destinations[0].star_system, "i Bootis");
+    }
+
+    /// A commander flying before 3.0 has no id
+    ///
+    /// `FID` arrived with the 3.0 client. Asking for it loses the commander
+    /// of every archived journal older than that, and with it the name every
+    /// row of the import would have been filed under.
+    #[test]
+    fn an_archived_commander_has_no_fid() {
+        let Event::Commander(commander) = assert_read(
+            r#"{
+                "timestamp": "2017-01-01T00:00:00Z",
+                "event": "Commander",
+                "Name": "Nixpulvis"
+            }"#,
+        ) else {
+            panic!("not a commander")
+        };
+
+        assert_eq!(commander.name, "Nixpulvis");
+        assert_eq!(commander.fid, None);
     }
 }

@@ -1,3 +1,12 @@
+//! What a commander's scanners found, and how much there is left to find
+//!
+//! `StarPos` is written by the game on three events only, `Location`,
+//! `FSDJump` and `CarrierJump`, and several of these name no system either.
+//! EDDN requires a sender to add both before forwarding, so an event arrives
+//! carrying them or not according to which feed it came down. Neither is
+//! asked for here. `SystemAddress` is on all of them and is what everything
+//! downstream hangs off.
+
 use crate::body::Discovery;
 use crate::prelude::*;
 use chrono::{DateTime, Utc};
@@ -169,7 +178,7 @@ pub struct Scan {
     /// [`None`] because not every uploader sends it, and nothing here reads it.
     pub scan_type: Option<String>,
     pub star_system: String,
-    pub star_pos: Coordinate,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
     #[serde(flatten)]
     pub target: ScanTarget,
@@ -191,8 +200,8 @@ pub struct FssBodySignals {
     #[serde(rename = "BodyID")]
     pub body_id: i16,
 
-    pub star_system: String,
-    pub star_pos: Coordinate,
+    pub star_system: Option<String>,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     pub signals: Vec<Signal>,
@@ -201,18 +210,54 @@ pub struct FssBodySignals {
 /// Everything hanging in a system that is not a body
 ///
 /// Stations, megaships, installations, beacons, and the unidentified sources
-/// that come and go. Sent in batches: the game emits one of these per signal
-/// and EDDN gathers a system's worth into a single message, so the outer
-/// timestamp is the first signal's and each signal carries its own.
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "PascalCase")]
+/// that come and go.
+#[derive(Debug)]
 pub struct FssSignalDiscovered {
     pub star_system: Option<String>,
     pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
-    #[serde(rename = "signals")]
+    /// The signals, however many of them arrived together
     pub signals: Vec<SystemSignal>,
+}
+
+impl<'de> Deserialize<'de> for FssSignalDiscovered {
+    /// Read EDDN's batch and the game's lone signal as the one thing
+    ///
+    /// The game writes an event per signal, with the signal's own fields on
+    /// the event. EDDN gathers a system's worth under `signals`, each with
+    /// the stamp it was seen at, so the outer timestamp is the first one's.
+    /// That key is what tells the two apart, and a lone signal is a batch of
+    /// one.
+    fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
+        let found = serde_json::Value::deserialize(de)?;
+
+        let signals = match found.get("signals") {
+            Some(batch) => Vec::deserialize(batch),
+            None => SystemSignal::deserialize(&found).map(|one| vec![one]),
+        }
+        .map_err(de::Error::custom)?;
+
+        let address = found
+            .get("SystemAddress")
+            .ok_or_else(|| de::Error::missing_field("SystemAddress"))?;
+
+        Ok(FssSignalDiscovered {
+            star_system: found
+                .get("StarSystem")
+                .map(String::deserialize)
+                .transpose()
+                .map_err(de::Error::custom)?,
+            star_pos: found
+                .get("StarPos")
+                .map(Coordinate::deserialize)
+                .transpose()
+                .map_err(de::Error::custom)?,
+            system_address: i64::deserialize(address)
+                .map_err(de::Error::custom)?,
+            signals,
+        })
+    }
 }
 
 /// One signal out of an [`FssSignalDiscovered`] batch
@@ -227,12 +272,14 @@ pub struct FssSignalDiscovered {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct SystemSignal {
-    /// Spelled lowercase, alone among the fields of this event
+    /// When it was seen, where the signal was one of a batch
     ///
-    /// Which is what the schema says, and the rest of the event is
-    /// PascalCase, so it has to be held out of the renaming by hand.
+    /// Spelled lowercase alone among the fields of this event, which is what
+    /// the schema says, so it is held out of the renaming by hand. [`None`]
+    /// for a signal the game wrote on its own, which is stamped by the entry
+    /// carrying it.
     #[serde(rename = "timestamp")]
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: Option<DateTime<Utc>>,
     pub signal_name: String,
     pub signal_type: Option<String>,
     /// Permanent where [`Some(true)`], which is as near an expiry as there is
@@ -257,7 +304,7 @@ pub struct SystemSignal {
 pub struct CodexEntry {
     #[serde(rename = "System")]
     pub system_name: String,
-    pub star_pos: Coordinate,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     #[serde(rename = "EntryID")]
@@ -289,7 +336,7 @@ pub struct CodexEntry {
 pub struct FssDiscoveryScan {
     #[serde(rename = "SystemName")]
     pub system_name: String,
-    pub star_pos: Coordinate,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     /// Bodies in the system: stars, planets, moons
@@ -313,7 +360,7 @@ pub struct FssDiscoveryScan {
 pub struct FssAllBodiesFound {
     #[serde(rename = "SystemName")]
     pub system_name: String,
-    pub star_pos: Coordinate,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     /// Bodies in the system, all of them now accounted for
@@ -328,8 +375,8 @@ pub struct FssAllBodiesFound {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct NavBeaconScan {
-    pub star_system: String,
-    pub star_pos: Coordinate,
+    pub star_system: Option<String>,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     /// Bodies in the system
@@ -345,7 +392,7 @@ pub struct NavBeaconScan {
 #[serde(rename_all = "PascalCase")]
 pub struct ScanBaryCentre {
     pub star_system: String,
-    pub star_pos: Coordinate,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
     #[serde(rename = "BodyID")]
     pub body_id: i16,
@@ -368,8 +415,8 @@ pub struct SAASignalsFound {
     #[serde(rename = "BodyID")]
     pub body_id: i16,
 
-    pub star_system: String,
-    pub star_pos: Coordinate,
+    pub star_system: Option<String>,
+    pub star_pos: Option<Coordinate>,
     pub system_address: i64,
 
     /// Detected nearby signals

@@ -21,8 +21,9 @@ pub struct NewCommander {
 pub struct Commander {
     #[serde(alias = "Commander")]
     pub name: String,
+    /// [`None`] in a journal older than the 3.0 client, which never wrote one
     #[serde(rename = "FID")]
-    pub fid: String,
+    pub fid: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
