@@ -1455,6 +1455,37 @@ mod tests {
         assert_eq!(found.signals[0].timestamp, None);
     }
 
+    /// A system said to be nothing is a system unsaid
+    ///
+    /// This event is the one read by hand rather than derived, and a derived
+    /// [`Option`] takes a null for [`None`]. Reading it as a string instead
+    /// would refuse the whole message over a field the event is allowed not
+    /// to have, which is the shape of every bug this reading was written for.
+    #[test]
+    fn a_signal_batch_naming_a_null_system_names_none() {
+        let Event::FssSignalDiscovered(found) = assert_read(
+            r#"{
+                "timestamp": "2026-08-08T12:00:00Z",
+                "event": "FSSSignalDiscovered",
+                "StarSystem": null,
+                "StarPos": null,
+                "SystemAddress": 10477373803,
+                "signals": [
+                    {
+                        "timestamp": "2026-08-08T12:00:00Z",
+                        "SignalName": "Abraham Lincoln"
+                    }
+                ]
+            }"#,
+        ) else {
+            panic!("not signals discovered")
+        };
+
+        assert_eq!(found.star_system, None);
+        assert_eq!(found.star_pos, None);
+        assert_eq!(found.signals.len(), 1);
+    }
+
     /// A plotted route says only that one was plotted
     ///
     /// The stops go in `NavRoute.json` beside the log, which is where the

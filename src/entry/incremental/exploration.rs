@@ -242,14 +242,18 @@ impl<'de> Deserialize<'de> for FssSignalDiscovered {
             .get("SystemAddress")
             .ok_or_else(|| de::Error::missing_field("SystemAddress"))?;
 
+        // A key that is there and null is a key that says nothing, which is
+        // what a derived `Option` reads it as. Read as the bare type instead
+        // it would refuse the whole message over a field the event is
+        // allowed not to carry.
+        let said = |field| found.get(field).filter(|value| !value.is_null());
+
         Ok(FssSignalDiscovered {
-            star_system: found
-                .get("StarSystem")
+            star_system: said("StarSystem")
                 .map(String::deserialize)
                 .transpose()
                 .map_err(de::Error::custom)?,
-            star_pos: found
-                .get("StarPos")
+            star_pos: said("StarPos")
                 .map(Coordinate::deserialize)
                 .transpose()
                 .map_err(de::Error::custom)?,
