@@ -73,8 +73,8 @@ impl<'de> Deserialize<'de> for ScanTarget {
     /// something it lacks: a star carries `StarType`, a planet `PlanetClass`, a
     /// cluster lies in a ring and names it as the nearest of its parents, and a
     /// ring carries an orbit and nothing of substance. A scan answering to none
-    /// of them is reported, since a shape nobody has modelled stored as the
-    /// nearest thing to hand is worse than a shape nobody has modelled said out
+    /// of them is reported, since a shape nobody has modeled stored as the
+    /// nearest thing to hand is worse than a shape nobody has modeled said out
     /// loud.
     fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
         let scan = serde_json::Value::deserialize(de)?;
