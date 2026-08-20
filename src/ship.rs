@@ -21,12 +21,10 @@ impl Default for Fuel {
 pub struct JumpCost {
     #[serde(skip)]
     pub ty: Fuel,
-    // EDDN optional only?
     #[serde(rename = "JumpDist")]
-    pub distance: f32,
-    // EDDN optional only?
+    pub distance: Option<f32>,
     #[serde(rename = "FuelUsed")]
-    pub used: f32,
+    pub used: Option<f32>,
     #[serde(rename = "FuelLevel")]
-    pub level: f32,
+    pub level: Option<f32>,
 }

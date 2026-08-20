@@ -185,7 +185,7 @@ pub struct FsdJump {
     #[serde(flatten)]
     pub system: System,
     #[serde(flatten)]
-    pub cost: Option<JumpCost>,
+    pub cost: JumpCost,
 }
 
 #[derive(Deserialize, Debug)]
