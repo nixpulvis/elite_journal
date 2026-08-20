@@ -95,9 +95,11 @@ pub enum DockingDeniedReason {
     ActiveFighter,
     NoReason,
     RestrictedAccess,
-    /// Spelled `DockingUnavliable` by the game, which is what is matched on
-    #[serde(rename = "DockingUnavliable")]
+    /// The game spells this `DockingUnavliable`; accept that misspelling as an
+    /// alias so a future fix to the correct spelling reads too.
+    #[serde(alias = "DockingUnavliable")]
     DockingUnavailable,
+    DockOffline,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -276,9 +278,15 @@ fn docking_denied_reason() {
         DockingDeniedReason::RestrictedAccess,
         read(r#""RestrictedAccess""#)
     );
-    // The game's own spelling, which is not ours to correct on the wire.
+    // The game's own misspelling, plus the correct spelling as an alias so a
+    // future fix reads too.
     assert_eq!(
         DockingDeniedReason::DockingUnavailable,
         read(r#""DockingUnavliable""#)
     );
+    assert_eq!(
+        DockingDeniedReason::DockingUnavailable,
+        read(r#""DockingUnavailable""#)
+    );
+    assert_eq!(DockingDeniedReason::DockOffline, read(r#""DockOffline""#));
 }
