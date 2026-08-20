@@ -67,7 +67,7 @@ where
     D: Deserializer<'d>,
 {
     let string = String::deserialize(deserializer)?;
-    if string == "" {
+    if string.is_empty() {
         Ok(None)
     } else {
         Ok(Some(string))
