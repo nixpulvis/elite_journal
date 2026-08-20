@@ -55,8 +55,7 @@ pub struct System {
     #[serde(default)]
     pub conflicts: Vec<FactionConflict>,
 
-    // TODO: Should this even be an enum?
-    pub powers: Option<Vec<String>>,
+    pub powers: Option<Vec<Power>>,
     pub powerplay_state: Option<PowerplayState>,
 }
 
@@ -227,6 +226,60 @@ fn powerplay_state() {
     assert_eq!(PowerplayState::Unoccupied, read(r#""Unoccupied""#));
     assert_eq!(PowerplayState::Fortified, read(r#""Fortified""#));
     assert_eq!(PowerplayState::Stronghold, read(r#""Stronghold""#));
+}
+
+/// A Powerplay power holding or contesting a system
+///
+/// Spelled as the journal's `Powers` array spells them. Arissa Lavigny-Duval
+/// is `A. Lavigny-Duval` in the journal and `Arissa Lavigny-Duval` everywhere
+/// the API and the dumps repeat her; both read to the one power. The second
+/// Powerplay added Nakato Kaine and Jerome Archer and retired no one from the
+/// historical record, so Zachary Hudson stays.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
+pub enum Power {
+    #[serde(rename = "Aisling Duval")]
+    AislingDuval,
+    #[serde(rename = "Archon Delaine")]
+    ArchonDelaine,
+    #[serde(rename = "A. Lavigny-Duval", alias = "Arissa Lavigny-Duval")]
+    ArissaLavignyDuval,
+    #[serde(rename = "Denton Patreus")]
+    DentonPatreus,
+    #[serde(rename = "Edmund Mahon")]
+    EdmundMahon,
+    #[serde(rename = "Felicia Winters")]
+    FeliciaWinters,
+    #[serde(rename = "Jerome Archer")]
+    JeromeArcher,
+    #[serde(rename = "Li Yong-Rui")]
+    LiYongRui,
+    #[serde(rename = "Nakato Kaine")]
+    NakatoKaine,
+    #[serde(rename = "Pranav Antal")]
+    PranavAntal,
+    #[serde(rename = "Yuri Grom")]
+    YuriGrom,
+    #[serde(rename = "Zachary Hudson")]
+    ZacharyHudson,
+    #[serde(rename = "Zemina Torval")]
+    ZeminaTorval,
+}
+
+#[test]
+fn power() {
+    let read = |json: &str| {
+        serde_json::from_str::<Power>(json)
+            .unwrap_or_else(|e| panic!("{} should read: {}", json, e))
+    };
+
+    assert_eq!(Power::EdmundMahon, read(r#""Edmund Mahon""#));
+    // The journal abbreviates her; the API and the dumps do not.
+    assert_eq!(Power::ArissaLavignyDuval, read(r#""A. Lavigny-Duval""#));
+    assert_eq!(Power::ArissaLavignyDuval, read(r#""Arissa Lavigny-Duval""#));
+    // The second Powerplay's additions.
+    assert_eq!(Power::NakatoKaine, read(r#""Nakato Kaine""#));
+    assert_eq!(Power::JeromeArcher, read(r#""Jerome Archer""#));
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
