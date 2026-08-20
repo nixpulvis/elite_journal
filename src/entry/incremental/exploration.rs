@@ -57,6 +57,22 @@ pub enum ScanTarget {
     Ring(Ring),
 }
 
+impl ScanTarget {
+    /// The `BodyID` of whatever was scanned
+    ///
+    /// Every kind of scan target is one of the system's numbered bodies, so
+    /// all four carry an id. Which kind it is does not matter to something
+    /// counting distinct bodies.
+    pub fn body_id(&self) -> i16 {
+        match self {
+            ScanTarget::Star(star) => star.id,
+            ScanTarget::Body(body) => body.id,
+            ScanTarget::Cluster(cluster) => cluster.id,
+            ScanTarget::Ring(ring) => ring.id,
+        }
+    }
+}
+
 impl<'de> Deserialize<'de> for ScanTarget {
     /// Read the field that tells the four apart, then read that one variant
     ///
