@@ -40,12 +40,62 @@ pub struct SellExplorationData {
     pub total_earnings: u64,
 }
 
+/// How close a look a `Scan` was
+///
+/// The five the Player Journal manual gives, and whatever else the game
+/// writes. [`ScanType::Other`] rather than an error because `ScanType` is one
+/// field of a thirty-field message and refusing it would refuse the scan: the
+/// day a sixth kind is added, every body scanned that way would go unrecorded
+/// galaxy-wide until this list caught up. It is not a place to leave a kind
+/// sitting, though, which is why the sync warns on one -- what arrives in that
+/// log is what to add here.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ScanType {
     Basic,
     Detailed,
     NavBeacon,
     NavBeaconDetail,
     AutoScan,
+    Other(String),
+}
+
+impl<'de> Deserialize<'de> for ScanType {
+    /// Read the name, and keep it whole where it is not one of the five
+    ///
+    /// By hand because serde cannot do both halves at once. Derived, the
+    /// variants read from their own names and an unfamiliar one is an error;
+    /// `#[serde(untagged)]` gets the catch-all but stops the unit variants
+    /// reading from a string at all, so every scan would come back as
+    /// [`ScanType::Other`]. This is the one-line match those attributes were
+    /// standing in for.
+    fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
+        let name = String::deserialize(de)?;
+        Ok(match name.as_str() {
+            "Basic" => ScanType::Basic,
+            "Detailed" => ScanType::Detailed,
+            "NavBeacon" => ScanType::NavBeacon,
+            "NavBeaconDetail" => ScanType::NavBeaconDetail,
+            "AutoScan" => ScanType::AutoScan,
+            _ => ScanType::Other(name),
+        })
+    }
+}
+
+impl ScanType {
+    /// Whether this is a nav beacon handing over a system it did not look at
+    ///
+    /// A beacon is read once and answers for every body in the system at
+    /// once, so the scans it writes are a transcription of what the beacon
+    /// holds rather than one commander's look at one body. The discovery flag
+    /// on them is not to be trusted: they carry `WasDiscovered: false` beside
+    /// `WasMapped: true`, which cannot both be true of one body, nobody having
+    /// mapped what nobody found -- 56 of 244 beacon scans in ten minutes of
+    /// EDDN, against 11 of 1,095 ordinary detailed ones. Sol arrives this way,
+    /// all forty of its objects in a single instant with the flag clear, which
+    /// read as one commander having discovered the solar system.
+    pub fn is_beacon(&self) -> bool {
+        matches!(self, ScanType::NavBeacon | ScanType::NavBeaconDetail)
+    }
 }
 
 /// What a `Scan` turned out to be about
@@ -69,6 +119,20 @@ impl ScanTarget {
             ScanTarget::Body(body) => body.id,
             ScanTarget::Cluster(cluster) => cluster.id,
             ScanTarget::Ring(ring) => ring.id,
+        }
+    }
+
+    /// What the scan said had already been done to whatever it looked at
+    ///
+    /// All four carry it, and what it means is the same for all four: not
+    /// what the body is, but what somebody had made of it before this scan
+    /// was taken.
+    pub fn discovery(&self) -> &Discovery {
+        match self {
+            ScanTarget::Star(star) => &star.discovery,
+            ScanTarget::Body(body) => &body.discovery,
+            ScanTarget::Cluster(cluster) => &cluster.discovery,
+            ScanTarget::Ring(ring) => &ring.discovery,
         }
     }
 }
@@ -191,8 +255,10 @@ pub struct Cluster {
 pub struct Scan {
     /// How close a look was taken, where the sender says
     ///
-    /// [`None`] because not every uploader sends it, and nothing here reads it.
-    pub scan_type: Option<String>,
+    /// [`None`] because not every uploader sends it, which is why nothing may
+    /// insist on reading it. What does read it reads [`ScanType::is_beacon`],
+    /// a beacon's scans being worth less than they look.
+    pub scan_type: Option<ScanType>,
     pub star_system: String,
     pub star_pos: Option<Coordinate>,
     pub system_address: i64,

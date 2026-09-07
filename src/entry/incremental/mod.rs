@@ -246,7 +246,7 @@ pub mod travel;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::entry::incremental::exploration::ScanTarget;
+    use crate::entry::incremental::exploration::{ScanTarget, ScanType};
     use crate::entry::Entry;
     use crate::system::Economy;
 
@@ -883,8 +883,9 @@ mod tests {
 
     /// A scan without a scan type reads
     ///
-    /// Not every uploader sends `ScanType`, and nothing here reads it. A star,
-    /// a planet and a belt cluster all arrive from one such sender.
+    /// Not every uploader sends `ScanType`, so nothing may insist on reading
+    /// it. A star, a planet and a belt cluster all arrive from one such
+    /// sender.
     #[test]
     fn a_scan_without_a_scan_type_reads() {
         let scan = |json: &str| {
@@ -941,6 +942,55 @@ mod tests {
             ),
             ScanTarget::Star(_)
         ));
+    }
+
+    /// A scan type reads, and one nobody has modelled reads as itself
+    ///
+    /// The game has added kinds of scan before and will again. Read into the
+    /// catch-all, an unfamiliar kind costs the entry nothing; refused, it
+    /// would take the whole scan with it, and every body scanned that way
+    /// would go unrecorded until this list caught up. Nothing sits in there
+    /// unnoticed either: the sync warns on one, which is how the list gets
+    /// added to. What reads a scan type reads
+    /// [`ScanType::is_beacon`], the beacon being the one kind whose word on
+    /// discovery is worthless.
+    #[test]
+    fn a_scan_says_how_close_a_look_it_was() {
+        let scanned = |kind: &str| {
+            let json = format!(
+                r#"{{
+                "timestamp": "2026-08-11T19:44:56Z",
+                "event": "Scan",
+                "ScanType": "{kind}",
+                "BodyName": "Synuefe DO-F d12-54 A Belt Cluster 1",
+                "BodyID": 2,
+                "Parents": [{{ "Ring": 1 }}, {{ "Star": 0 }}],
+                "StarSystem": "Synuefe DO-F d12-54",
+                "StarPos": [196.1875, -210.65625, 25.125],
+                "SystemAddress": 1865953528171,
+                "DistanceFromArrivalLS": 7.693174,
+                "WasDiscovered": true,
+                "WasMapped": false
+            }}"#
+            );
+            let Event::Scan(scan) = assert_read(&json) else {
+                panic!("not a scan")
+            };
+            scan.scan_type.expect("a scan type was sent")
+        };
+
+        assert_eq!(scanned("Detailed"), ScanType::Detailed);
+        assert!(!scanned("Detailed").is_beacon());
+        assert!(scanned("NavBeaconDetail").is_beacon());
+        assert!(scanned("NavBeacon").is_beacon());
+
+        // A kind nobody has modelled, kept as it was sent rather than
+        // refused: the scan around it is still a scan of a belt cluster.
+        assert_eq!(
+            scanned("SomethingNewInUpdate20"),
+            ScanType::Other("SomethingNewInUpdate20".to_owned())
+        );
+        assert!(!scanned("SomethingNewInUpdate20").is_beacon());
     }
 
     /// A settlement whose faction is an empty object reads
