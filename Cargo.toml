@@ -13,6 +13,11 @@ with-sqlx = ["sqlx/runtime-async-std-native-tls"]
 # binary a geometry column holds. geozero's postgis integration is an `Encode`
 # and a `Decode` of its own, which nothing in this crate calls.
 with-postgis-sqlx = ["with-sqlx", "geozero/with-wkb"]
+# Wake the journal watch from the filesystem — inotify, kqueue/FSEvents,
+# `ReadDirectoryChangesW` — rather than going back to the directory on a
+# timer. Off by default: a parse-only consumer reads files it already has and
+# never follows a directory the game is writing.
+watch = ["dep:notify"]
 
 [dependencies]
 serde      = { version = "1.0", features = ["derive"] }
@@ -20,3 +25,10 @@ serde_json = "1.0"
 chrono     = { version = "0.4", features = ["serde"] }
 sqlx       = { version = "^0.8", optional = true, features = ["postgres"] }
 geozero    = { version = "0.15", optional = true }
+# Where the reader says what it could not read: a log that would not stat, a
+# route file caught mid-rewrite. Events rather than stderr, so the consumer's
+# own subscriber decides what becomes of them.
+tracing    = "0.1"
+# The filesystem watch behind `watch`: inotify on Linux, kqueue/FSEvents on
+# macOS, `ReadDirectoryChangesW` on Windows.
+notify     = { version = "8", optional = true }

@@ -54,6 +54,10 @@ pub use self::entry::{
     parse_journal_dir, parse_journal_file, parse_status_file, Entry,
 };
 
+// Documented at the top of the module, not here.
+pub mod journal;
+pub use self::journal::{Follower, Journal, Read, Watch, EVERY};
+
 /// A star system, located in static 3D space
 pub mod system;
 
