@@ -412,8 +412,11 @@ mod tests {
 
     /// A scratch journal directory of this test's own.
     fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir()
-            .join(format!("elite_journal_{}_{}", name, std::process::id()));
+        let dir = std::env::temp_dir().join(format!(
+            "elite_journal_{}_{}",
+            name,
+            std::process::id()
+        ));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("a scratch directory");
         dir

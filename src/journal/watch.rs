@@ -166,8 +166,7 @@ impl Beat {
                 use std::sync::mpsc::RecvTimeoutError;
 
                 let mut left = every;
-                while left > Duration::ZERO
-                    && !stopping.load(Ordering::Relaxed)
+                while left > Duration::ZERO && !stopping.load(Ordering::Relaxed)
                 {
                     let slice = left.min(WAKE);
                     match events.recv_timeout(slice) {

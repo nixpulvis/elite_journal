@@ -51,10 +51,7 @@ impl Journal {
     /// A journal over the directory at `dir`, having read none of it.
     pub fn new(dir: impl Into<PathBuf>) -> Journal {
         let dir = dir.into();
-        Journal {
-            follower: Arc::new(RwLock::new(Follower::new(&dir))),
-            dir,
-        }
+        Journal { follower: Arc::new(RwLock::new(Follower::new(&dir))), dir }
     }
 
     /// The directory being read.

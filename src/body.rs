@@ -670,7 +670,10 @@ fn a_class_carries_its_size() {
         StarClass::from_str("M_RedSuperGiant").unwrap(),
         StarClass::M(StarSize::SuperGiant),
     );
-    assert_eq!(StarClass::from_str("M").unwrap(), StarClass::M(StarSize::Dwarf));
+    assert_eq!(
+        StarClass::from_str("M").unwrap(),
+        StarClass::M(StarSize::Dwarf)
+    );
     assert_eq!(
         StarClass::from_str("K_OrangeGiant").unwrap().size(),
         Some(StarSize::Giant),
@@ -682,10 +685,7 @@ fn a_class_carries_its_size() {
     // Every M is an M, whatever size it is, which is what matching on the
     // letter is for.
     for token in ["M", "M_RedGiant", "M_RedSuperGiant"] {
-        assert!(matches!(
-            StarClass::from_str(token).unwrap(),
-            StarClass::M(_)
-        ));
+        assert!(matches!(StarClass::from_str(token).unwrap(), StarClass::M(_)));
     }
 }
 
