@@ -117,6 +117,11 @@ pub enum Government {
     Carrier,
     #[serde(alias = "$government_Megaconstruction;")]
     Megaconstruction,
+    /// A settlement somebody owns outright. The dumps spell it with the
+    /// space and the journal does not.
+    #[serde(alias = "$government_PrivateOwnership;")]
+    #[serde(alias = "Private Ownership")]
+    PrivateOwnership,
     #[serde(alias = "")]
     #[serde(alias = "$government_None;")]
     None,
@@ -187,7 +192,9 @@ pub enum Allegiance {
     PilotsFederation,
     PlayerPilots,
     Thargoid,
-    /// A company rather than a power, which is where the game puts it
+    /// A company rather than a power, which is where the game puts it.
+    /// The dumps spell it with the space and the journal does not.
+    #[serde(alias = "Frontline Solutions")]
     FrontlineSolutions,
     #[serde(alias = "")]
     None,

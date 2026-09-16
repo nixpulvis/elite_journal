@@ -313,6 +313,14 @@ pub enum Economy {
     Prison,
     #[serde(alias = "$economy_Rescue;")]
     Rescue,
+    /// A colonisation economy: a private concern rather than a faction's
+    /// industry. The dumps spell it with the space.
+    #[serde(alias = "$economy_PrivateEnterprise;")]
+    #[serde(alias = "Private Enterprise")]
+    PrivateEnterprise,
+    /// What a repair megaship trades in, beside [`Economy::Rescue`].
+    #[serde(alias = "$economy_Repair;")]
+    Repair,
     #[serde(alias = "$economy_Undefined;")]
     Undefined,
     #[serde(alias = "")]
