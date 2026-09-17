@@ -61,6 +61,12 @@ pub use self::journal::{Follower, Journal, Read, Watch, EVERY};
 /// A star system, located in static 3D space
 pub mod system;
 
+// Documented at the top of the module, not here: where a system sits, as
+// its own `SystemAddress` spells it, and how a procedural name spells the
+// same place back.
+pub mod boxel;
+pub use self::boxel::Boxel;
+
 /// A star system's orbital bodies, located in dynamic 3D space
 pub mod body;
 
