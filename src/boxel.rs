@@ -46,7 +46,11 @@ pub const ORIGIN: [f64; 3] = [-49985.0, -40985.0, -24105.0];
 pub const SECTOR_LY: f64 = 1280.0;
 
 /// The three letters of a boxel code, in base 26, before the run counts.
-const LETTERS: u32 = 26 * 26 * 26;
+///
+/// Public because a caller building a boxel from a code and a run — which
+/// is what a search over coordinates does — has to do the same arithmetic
+/// [`Boxel::tail`] undoes.
+pub const LETTERS: u32 = 26 * 26 * 26;
 
 /// How many boxels a sector's code numbers along one axis.
 ///
