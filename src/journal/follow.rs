@@ -159,9 +159,9 @@ impl Follower {
     /// Take the directory as already read, without reading any of it.
     ///
     /// For a caller that has another way of reading the whole directory and
-    /// wants to follow it afterwards — `galos-sync --from journal=DIR --db
-    /// --watch`, which imports the lot in timestamp order across every file
-    /// and then tails what arrives. Without this the first poll would hand
+    /// wants to follow it afterwards — `galos-db ingest --from journal=DIR
+    /// --watch`, which imports the lot in timestamp order across every
+    /// file and then tails what arrives. Without this the first poll would hand
     /// the importer's work back to it a second time, which is a gigabyte of
     /// finished logs re-parsed and re-written for nothing.
     ///
@@ -361,7 +361,8 @@ const ROUTE_FILE: &str = "NavRoute.json";
 /// Sorted by name, which is the order the game's own naming gives: the
 /// timestamp is the leading part of it and the part number follows, so a
 /// session continued into a second file sorts after the first. The same rule
-/// `galos-sync --from journal=DIR` reads a directory by.
+/// `--from journal=DIR` reads a directory by, in either of the tools that
+/// takes it.
 fn logs(dir: &Path) -> io::Result<Vec<PathBuf>> {
     let mut logs: Vec<PathBuf> = std::fs::read_dir(dir)?
         .filter_map(|entry| entry.ok())
