@@ -159,7 +159,7 @@ impl Follower {
     /// Take the directory as already read, without reading any of it.
     ///
     /// For a caller that has another way of reading the whole directory and
-    /// wants to follow it afterwards — `galos-db ingest --from journal=DIR
+    /// wants to follow it afterwards — `galos db ingest --from journal=DIR
     /// --watch`, which imports the lot in timestamp order across every
     /// file and then tails what arrives. Without this the first poll would hand
     /// the importer's work back to it a second time, which is a gigabyte of
