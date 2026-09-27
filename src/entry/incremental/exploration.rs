@@ -368,7 +368,7 @@ pub struct SystemSignal {
     pub timestamp: Option<DateTime<Utc>>,
     pub signal_name: String,
     pub signal_type: Option<String>,
-    /// Permanent where [`Some(true)`], which is as near an expiry as there is
+    /// Permanent where `Some(true)`, which is as near an expiry as there is
     pub is_station: Option<bool>,
     #[serde(rename = "USSType")]
     pub uss_type: Option<String>,
