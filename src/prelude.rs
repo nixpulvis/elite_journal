@@ -10,11 +10,6 @@ pub use crate::station::{
     StationType,
 };
 pub use crate::system::{
-    Coordinate,
-    Economy,
-    // TODO: finish and expose here.
-    // PowerplayState,
-    Security,
-    System,
+    Coordinate, Economy, Power, PowerplayState, Security, System,
 };
 pub use crate::{Allegiance, Government};

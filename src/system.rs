@@ -57,6 +57,13 @@ pub struct System {
 
     pub powers: Option<Vec<Power>>,
     pub powerplay_state: Option<PowerplayState>,
+    /// The power holding the system, which the second Powerplay's journal
+    /// names beside `Powers` and the first Powerplay's never did.
+    ///
+    /// Absent where no power holds it: an unoccupied system, one only being
+    /// fought over, and every arrival written before the key existed.
+    #[serde(default)]
+    pub controlling_power: Option<Power>,
 }
 
 impl System {
@@ -77,6 +84,7 @@ impl System {
             conflicts: vec![],
             powers: None,
             powerplay_state: None,
+            controlling_power: None,
         }
     }
 }
@@ -106,6 +114,43 @@ fn system() {
     assert_eq!(None, system.allegiance);
     assert_eq!(None, system.economy);
     assert_eq!(None, system.second_economy);
+}
+
+#[test]
+fn controlling_power() {
+    let read = |json: &str| {
+        serde_json::from_str::<System>(json)
+            .unwrap_or_else(|e| panic!("{} should read: {}", json, e))
+    };
+
+    // An arrival as the second Powerplay writes one.
+    let held = read(
+        r#"
+        {
+            "StarSystem": "Somewhere",
+            "SystemAddress": 1928374650,
+            "ControllingPower": "Nakato Kaine",
+            "Powers": ["Nakato Kaine", "Edmund Mahon"],
+            "PowerplayState": "Fortified"
+        }
+    "#,
+    );
+    assert_eq!(Some(Power::NakatoKaine), held.controlling_power);
+    assert_eq!(Some(PowerplayState::Fortified), held.powerplay_state);
+
+    // Fought over and held by nobody: the key is left out.
+    let unheld = read(
+        r#"
+        {
+            "StarSystem": "Somewhere",
+            "SystemAddress": 1928374650,
+            "Powers": ["Nakato Kaine", "Edmund Mahon"],
+            "PowerplayState": "Unoccupied"
+        }
+    "#,
+    );
+    assert_eq!(None, unheld.controlling_power);
+    assert_eq!(Some(PowerplayState::Unoccupied), unheld.powerplay_state);
 }
 
 /// How well a system is policed
@@ -185,7 +230,7 @@ fn security() {
     assert!(low > anarchy);
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 pub enum PowerplayState {
     InPrepareRadius,
