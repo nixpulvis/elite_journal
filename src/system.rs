@@ -108,7 +108,12 @@ fn system() {
     assert_eq!(None, system.second_economy);
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+/// How well a system is policed
+///
+/// Anarchy is the absence of security, so the game's empty reading and its
+/// anarchy one are the same fact and one variant here. Both read as null
+/// (see [`Nullable`]): a store keeps anarchy as no security at all.
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "with-sqlx", derive(sqlx::Type))]
 #[serde(rename_all = "PascalCase")]
 pub enum Security {
@@ -123,9 +128,9 @@ pub enum Security {
     Low,
     #[serde(alias = "$SYSTEM_SECURITY_anarchy;")]
     #[serde(alias = "$GAlAXY_MAP_INFO_state_anarchy;")]
-    Anarchy,
+    #[serde(alias = "None")]
     #[serde(alias = "")]
-    None,
+    Anarchy,
 }
 
 impl fmt::Display for Security {
@@ -136,29 +141,14 @@ impl fmt::Display for Security {
 
 impl Nullable for Security {
     fn is_null(&self) -> bool {
-        match self {
-            Security::None => true,
-            Security::Anarchy => true,
-            _ => false,
-        }
-    }
-}
-
-impl PartialEq for Security {
-    fn eq(&self, other: &Self) -> bool {
-        match (*other, *self) {
-            (Security::None, Security::None) => false,
-            (l, r) => l as u8 == r as u8,
-        }
+        matches!(self, Security::Anarchy)
     }
 }
 
 impl PartialOrd for Security {
+    /// Higher security is greater: High over Medium over Low over Anarchy.
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match (*other, *self) {
-            (_, Security::None) | (Security::None, _) => None,
-            (l, r) => (l as u8).partial_cmp(&(r as u8)),
-        }
+        (*other as u8).partial_cmp(&(*self as u8))
     }
 }
 
@@ -186,14 +176,13 @@ fn security() {
     .unwrap();
     assert_eq!(Security::Anarchy, anarchy);
     assert!(anarchy.is_null());
-    let none = serde_json::from_str(r#""""#).unwrap();
-    assert!(anarchy != none);
-    assert!(Security::None != none);
-    assert!(none.is_null());
+    // No security is anarchy, however the game says it.
+    for said in [r#""""#, r#""None""#, r#""$SYSTEM_SECURITY_anarchy;""#] {
+        let read: Security = serde_json::from_str(said).unwrap();
+        assert_eq!(Security::Anarchy, read, "{said}");
+    }
     assert!(high > low);
     assert!(low > anarchy);
-    assert!(!(anarchy > none));
-    assert!(!(anarchy < none));
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
